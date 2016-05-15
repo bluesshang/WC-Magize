@@ -53,25 +53,26 @@ public class DataRecordItem
     public string accused; // 被告
     public string accuser; // 原告
     public string court; // 法院
-    public string court_room; // 法庭
+    public string courtRoom; // 法庭
     public NoticeType type;
     public string judge; // 法官
     public string telephone;
     public string clerk; // 业务员
     public string memo;
-    public string case_title; // 案件名称
+    public string caseTitle; // 案件名称
+    public DataParagraph para;
 
     public void Reset()
     {
         accused = "";
         accuser = "";
         court = "";
-        court_room = "";
+        courtRoom = "";
         judge = "";
         telephone = "";
         clerk = "";
         memo = "";
-        case_title = "";
+        caseTitle = "";
         type = NoticeType.UNKNOWN;
     }
     public void MakeJson()
@@ -172,7 +173,7 @@ public abstract class DataParser
         {
             dri.accused = m.Groups["accused"].Value;
             dri.accuser = m.Groups["accuser"].Value;
-            dri.case_title = m.Groups["case_title"].Value;
+            dri.caseTitle = m.Groups["case_title"].Value;
             // simplify the case title if any
             SimplfyCaseTitle(data, ref dri);
         }
@@ -181,7 +182,7 @@ public abstract class DataParser
         if (t != -1)
             dri.accuser = dri.accuser.Substring(t + 2);
 
-        dri.court_room = ExtractCourtRoom(data);
+        dri.courtRoom = ExtractCourtRoom(data);
 
         dri.court = ExtractCourt(data);
 
@@ -192,16 +193,16 @@ public abstract class DataParser
 
     public static void SimplfyCaseTitle(string data, ref DataRecordItem dri)
     {
-        if (dri.case_title == "")
-            dri.case_title = data; // guess from the whole string
+        if (dri.caseTitle == "")
+            dri.caseTitle = data; // guess from the whole string
 
-        int pos = dri.case_title.IndexOf(dri.accused);
+        int pos = dri.caseTitle.IndexOf(dri.accused);
         if (pos != -1)
-            dri.case_title = dri.case_title.Substring(pos + dri.accused.Length);
-        StringHitPos hp = IndexOfAny(dri.case_title, PRESET_CASE_TITLE);
+            dri.caseTitle = dri.caseTitle.Substring(pos + dri.accused.Length);
+        StringHitPos hp = IndexOfAny(dri.caseTitle, PRESET_CASE_TITLE);
         if (hp.pos != -1)
         {   // use the preset case title if any
-            dri.case_title = dri.case_title.Substring(hp.pos, hp.hitlen);
+            dri.caseTitle = dri.caseTitle.Substring(hp.pos, hp.hitlen);
         }
     }
     public static StringHitPos IndexOfAny(string data, string anyOf, int startPos = 0)
@@ -494,7 +495,7 @@ public class ExecuteParser : DataParser
         {
             dri.accused = m.Groups["accused"].Value;
             dri.accuser = m.Groups["accuser"].Value;
-            dri.case_title = m.Groups["case_title"].Value;
+            dri.caseTitle = m.Groups["case_title"].Value;
             SimplfyCaseTitle(data, ref dri);
         }
         dri.court = ExtractCourt(data);
@@ -522,7 +523,7 @@ public class AppealParser : DataParser
         {
             dri.accused = m.Groups["accused"].Value;
             dri.accuser = m.Groups["accuser"].Value;
-            dri.case_title = m.Groups["case_title"].Value;
+            dri.caseTitle = m.Groups["case_title"].Value;
             SimplfyCaseTitle(data, ref dri);
         }
         dri.court = ExtractCourt(data);

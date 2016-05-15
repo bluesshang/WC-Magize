@@ -80,7 +80,7 @@
             <div class="checkbox">
               <label><input type="checkbox" value="" checked>Remember me</label>
             </div>
-              <button type="submit" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Login</button>
+              <button type="submit" class="btn btn-success col-xs-3"><span class="glyphicon glyphicon-off"></span> Login</button>
           </form>
         </div>
         <div class="modal-footer">
@@ -90,7 +90,7 @@
       </div>
     </div>
   </div> 
-  <p align="center" style="margin-top:30px">(c)2016 WenCui Magazine.</p>
+  <p align="center" style="margin-top:30px">(c)2016 WenCui Magazine. <span class="glyphicon glyphicon-envelope"></span> blues.shang@yahoo.com </p> 
 </div>
 
 <script>
