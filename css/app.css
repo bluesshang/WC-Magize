@@ -70,3 +70,9 @@
     margin-top: 5px;
     margin-left:200px;*/
 }
+
+.form-group-border {
+    background-color:#ebebeb;
+    padding:5px 5px 5px 5px;
+    border-radius:5px;
+}

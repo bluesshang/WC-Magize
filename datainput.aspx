@@ -28,7 +28,7 @@
             <p>例如：“XXX：本院受理XXX诉你XXX一案，并定于2015年3月30日上午10：30在XXX公开开庭审理。XXX人民法院”。 
                 <span class="glyphicon glyphicon-info-sign"></span><a href="#" onclick="new function(){$('#bizDataSample').modal();}"> 点击查看示例 ...</a></p>
             <form role="form" id="frmParagrahInput">
-                <div class="form-group">
+                <div class="form-group form-group-border">
                     <textarea class="form-control" rows="7" id="paragraphText" name="paragraphText"></textarea>
                     <span class="help-block" id="paragraphInfo"></span>
                 </div>
@@ -165,20 +165,19 @@
                     //}
                     ////////text += "</table>"
                     ////////$("#proc_info").html(text);
-
                     var cv = new wijmo.collections.CollectionView(data.records);
                     dataViewer.itemsSource = cv;
                     //dataViewer.itemsSource.pageSize = 20;
                     //dataViewer.itemsSource.moveToNextPage();
                     //dataViewer.itemsSource.pageIndex = 3;
                     //alert("ok");
-                    //cv.currentChanged.addHandler(function (sender, args) {
-                    //    //alert("cv.currentItem = " + cv.currentItem.para.text);
-                    //    //$("#bottomTip").show(500);
-                    //    alert(cv.currentItem.para.text);
-                    //    $("#bottomTip").html(cv.currentItem.para.text);
-                    //});
-                    cv.currentChanged.addHandler(zzzzzzzzz);
+                    cv.currentChanged.addHandler(function (sender, args) {
+                        //alert("cv.currentItem = " + cv.currentItem.para.text);
+                        //$("#bottomTip").show(500);
+                        //alert(cv.currentItem.para.text);
+                        $("#bottomTip").html(cv.currentItem.para.text);
+                    });
+                    //cv.currentChanged.addHandler(zzzzzzzzz);
                 },
                 error: function (o, message) {
                     alert(message);
@@ -266,11 +265,32 @@
 
         dataViewer = new wijmo.grid.FlexGrid('#dataViewer', {
             showSelectedHeaders: 'All',
-            itemsSource: null
+            itemsSource: null,
+            autoGenerateColumns: false,
+            columns: [
+                { header: '-', binding: 'valid', width: '.7*', format: 'b', dataType:"Boolean" },
+                { header: '类型', binding: 'type', width: '*' },
+                { header: '被告', binding: 'accused', width: '3*' },
+                { header: '原告', binding: 'accuser', width: '3*' },
+                { header: '法院', binding: 'court', width: '2*' },
+                { header: '法庭', binding: 'courtRoom', width: '2*' },
+                { header: '案件类型', binding: 'caseTitle', width: '2*' },
+                { header: '电话', binding: 'telephone', width: '*' },
+                { header: '日期', width: '*', dataType:"Date" },
+                //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
+                { header: '解析结果', binding: 'message', isReadOnly: true }
+            ]
             //new wijmo.odata.ODataCollectionView(
             //'http://services.odata.org/V4/Northwind/Northwind.svc/',
             //'Order_Details_Extendeds'),
         });
+
+        bizTypes = [
+            { id: 0, name: '开庭' },
+            { id: 1, name: '判决' }
+        ];
+        var typeMapping = new wijmo.grid.DataMap(bizTypes, "id", "name");
+        dataViewer.columns.getColumn('type').dataMap = typeMapping;;
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);
     });

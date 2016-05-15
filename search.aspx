@@ -9,6 +9,6 @@
       <input class="form-control input-lg" id="pwd" placeholder="Searching anything">
       <span class="help-block">This is some help text that breaks onto a new line and may extend more than one line.</span>
     </div>
-    <button type="submit" class="btn btn-default">Submit</button>
+    <button type="submit" class="btn btn-primary">Search</button>
   </form>
 </div>
