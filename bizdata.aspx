@@ -119,7 +119,9 @@
                             <div id="collapse1" class="panel-collapse collapse in">
                                 <div class="panel-body">录入新的报刊登记信息.</div>
                                 <div class="list-group">
-                                    <a href="#" class="list-group-item " id="batchInput"><span class="badge">unknown:400</span>
+                                    <a href="#" class="list-group-item " id="batchInput">
+                                        <span class="badge btn-success">30</span>
+                                        <span class="badge">unknown:400</span>
                                         <h4 class="list-group-item-heading">批量录入</h4>
                                         <p class="list-group-item-text">通过文件的方式，系统会尽可能解析文件中的业务数据，一次性录入多条记录。</p>
                                     </a>
@@ -325,6 +327,7 @@
                 simpleModeCommands: ["Bold", "Italic", "FontName", "FontSize", "InsertImage", "NumberedList", "BulletedList", "Undo"]
             });    */
 
+            $("#mainClientArea").load("datainput.aspx");
             $("#bottomTipCtrl").hide();
         });
     </script>

@@ -44,9 +44,12 @@
 </div>
 <div class="container">
     <p></p>
-    <div id="dataViewer" class="panel panel-primary"></div>
+    <!--div style="border:1px solid red"-->
+        <div id="dataViewer" class="panel panel-primary"></div>
+    <!--/div-->
     <button type="button" id="submitBizdata" class="btn btn-success btn-lg">
-        <span class="glyphicon glyphicon-floppy-saved"></span> 提交系统保存</button>
+        <span class="glyphicon glyphicon-floppy-saved"></span> 提交系统保存
+    </button>
 </div>
 
 <script>
@@ -233,7 +236,9 @@
         });
 
         $(document).on('mousedown', function (e) {
-            if (dataViewer.itemsSource == null)
+            if (dataViewer.itemsSource == null || dataViewer.itemsSource.items.length < 2
+                || e.toElement.id == "bottomTipCtrl"
+                || e.toElement.id == "bottomTip")
                 return;
 
             var t = $("#dataViewer").offset().top;
