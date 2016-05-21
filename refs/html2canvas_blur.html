@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Blur with Canvas</title>
+    <style>
+			#demo {
+			  width: 400px;
+			  /*height: 200px;*/
+			  background: white;
+			}
+			#blur {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			}
+	</style>  
+</head>
+<body>
+    <div id="demo">
+	    <h2>Blippity Fling-Flang</h2>
+	    <p>Ho ha meepfloo hum nip zongle, yap izzle ho noodle da. Doo twaddle zap? dilznoofus Jackson. 
+	                Loo cake blungflib. Yip dingle ha? bang Mr. Slav. Flab zap dingely dizzleshrubbery. Quabble ha 
+	        blop da shnuzzle-slap!! Funk hum zang shnuzzle? Crongle loo twaddling hizzywoogle.</p>
+			<p><a href="http://bff.orangehairedboy.com/">Blippity Fling-Flang by orangehairedboy</a></p>
+			<img src="../images/log.jpg"/>
+    </div>
+    <script src="../js/jquery-2.0.0.js"></script>
+
+    <script src="../js/StackBlur.js"></script>
+    <script src="../js/html2canvas.js"></script>
+</body>
+<script>
+	$('body').on('click', '#demo', function () {
+	    html2canvas($("#demo"), {
+	    //html2canvas(document.body, {
+	        onrendered: function (canvas) {
+	            // 建立网页快照
+	            $(canvas).attr('id', 'blur').appendTo('body');
+	            var off = $("#demo").offset();
+	            $(canvas).offset(off);
+	            var width = $(canvas).width();
+	            var height = $(canvas).height();
+	            stackBlurCanvasRGBA('blur', 0, 0, width, height, 10); // canvas 模糊
+	        }
+	    });
+	}).on('click', '#blur', function () {
+	    $(this).remove();
+	});	
+</script>
+</html>

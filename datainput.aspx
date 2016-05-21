@@ -188,12 +188,12 @@
             });
         });
 
-        function zzzzzzzzz(sender, args) {
-            //alert("cv.currentItem = " + cv.currentItem.para.text);
-            //$("#bottomTip").show(500);
-            //alert("cv.currentItem.para.text");
-            $("#bottomTip").html(dataViewer.itemsSource.currentItem.para.text);
-        }
+        //function zzzzzzzzz(sender, args) {
+        //    //alert("cv.currentItem = " + cv.currentItem.para.text);
+        //    //$("#bottomTip").show(500);
+        //    //alert("cv.currentItem.para.text");
+        //    $("#bottomTip").html(dataViewer.itemsSource.currentItem.para.text);
+        //}
 
         $("#submitBizdata").click(function () {
             //var person = [{
@@ -210,8 +210,8 @@
 
             $.ajax({
                 type: 'post',
-                url: 'DataSave.aspx',
-                data: "op=new&data=" + JSON.stringify(dataViewer.itemsSource.items), //$("#form1").serialize(),
+                url: 'do.aspx',
+                data: "op=save&employeeId=4&data=" + JSON.stringify(dataViewer.itemsSource.items), //$("#form1").serialize(),
                 //data: "op=new&data=" + JSON.stringify(person), //$("#form1").serialize(),
                 //data: $("#frmParagrahInput").serialize(),
                 cache: false,
@@ -272,17 +272,24 @@
             showSelectedHeaders: 'All',
             itemsSource: null,
             autoGenerateColumns: false,
+            //autoSizeMode:true,
+            //sortRowIndex:true,
+            //allowAddNew: true,
             columns: [
-                { header: '-', binding: 'valid', width: '.7*', format: 'b', dataType:"Boolean" },
-                { header: '类型', binding: 'type', width: '*' },
-                { header: '被告', binding: 'accused', width: '3*' },
-                { header: '原告', binding: 'accuser', width: '3*' },
-                { header: '法院', binding: 'court', width: '2*' },
-                { header: '法庭', binding: 'courtRoom', width: '2*' },
-                { header: '案件类型', binding: 'caseTitle', width: '2*' },
-                { header: '电话', binding: 'telephone', width: '*' },
-                { header: '日期', width: '*', dataType:"Date" },
+                { header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
+                { header: '类型', binding: 'type', width:100 },
+                { header: '被告', binding: 'accused'},
+                { header: '原告', binding: 'accuser'},
+                { header: '法院', binding: 'court'},
+                { header: '法庭', binding: 'courtRoom' },
+                { header: '法官', binding: 'judge' },
+                { header: '案件类型', binding: 'title'},
+                { header: '电话', binding: 'telephone'},
+                { header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', minWidth:20, maxWidth:40 },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
+                { header: '备注', binding: 'remark'},
                 { header: '解析结果', binding: 'message', isReadOnly: true }
             ]
             //new wijmo.odata.ODataCollectionView(
@@ -290,10 +297,6 @@
             //'Order_Details_Extendeds'),
         });
 
-        bizTypes = [
-            { id: 0, name: '开庭' },
-            { id: 1, name: '判决' }
-        ];
         var typeMapping = new wijmo.grid.DataMap(bizTypes, "id", "name");
         dataViewer.columns.getColumn('type').dataMap = typeMapping;;
 

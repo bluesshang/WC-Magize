@@ -4,7 +4,8 @@
 <html lang="zh-CN">
 <head>
     <title>文萃报刊信息登记管理系统</title>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="author" content="Blues Shang (blues.shang@yahoo.com)">
     <link rel="shortcut icon" href="images/icon.jpg" type="image/x-icon" />
 
     <link rel="stylesheet" href="css/bootstrap-3.3.6.css">
@@ -31,6 +32,7 @@
     <!-- Wijmo -->
     <link href="css/wijmo.min.css" rel="stylesheet" />
     <link href="css/wijmo.theme.material.min.css" rel="stylesheet" />
+    <!--link href="css/wijmo.theme.cocoa.min.css" rel="stylesheet" /-->
 
     <script src="js/wijmo.min.js"></script>
     <script src="js/wijmo.input.min.js"></script>
@@ -48,7 +50,10 @@
 			<script src="http://cdn.wijmo.com/jquery.wijmo-open.all.3.20132.15.min.js" type="text/javascript"></script>
 			<script src="http://cdn.wijmo.com/jquery.wijmo-pro.all.3.20132.15.min.js" type="text/javascript"></script-->
 
+    <script src="js/wijmo.culture.zh.js"></script>
+
     <link rel="stylesheet" href="css/app.css">
+    <script src="js/app.js"></script>
 
     <style>
   </style>
@@ -69,20 +74,19 @@
             </div>
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#myPage">HOME</a></li>
-                    <li><a href="#band">BAND</a></li>
-                    <li><a href="#tour">TOUR</a></li>
-                    <li><a href="#contact">CONTACT</a></li>
+                    <li><a href="#" id="search"><span class="glyphicon glyphicon-search"></span></a></li>
                     <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
-          <span class="caret"></span></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon glyphicon-star"></span> Theme(material) <span class="caret"></span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">Merchandise</a></li>
-                            <li><a href="#">Extras</a></li>
-                            <li><a href="#">Media</a></li>
+                            <li><a href="#">default</a></li>
+                            <li><a href="#">material</a></li>
+                            <li><a href="#">grayscale</a></li>
+                            <li><a href="#">cocoa</a></li>
+                            <li><a href="#">...</a></li>
                         </ul>
                     </li>
-                    <li><a href="#" id="search"><span class="glyphicon glyphicon-search"></span></a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <span class="glyphicon glyphicon-user"></span> 刘志杰(admin) <span class="caret"></span>
@@ -107,8 +111,8 @@
         <tr>
             <td style="width: 25%; min-width: 300px; max-width: 500px; margin-left: 5px; vertical-align: top;">
                 <div style="padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto;">
-                    <h2>Accordion Example</h2>
-                    <p><strong>Note:</strong> The <strong>data-parent</strong> attribute makes sure that all collapsible elements under the specified parent will be closed when one of the collapsible item is shown.</p>
+                    <!--h2>Accordion Example</!--h2>
+                    <p><strong>Note:</strong> The <strong>data-parent</strong> attribute makes sure that all collapsible elements under the specified parent will be closed when one of the collapsible item is shown.</p-->
                     <div class="panel-group" id="accordion">
                         <div class="panel panel-primary">
                             <div class="panel-heading">
@@ -117,19 +121,18 @@
                                 </h4>
                             </div>
                             <div id="collapse1" class="panel-collapse collapse in">
-                                <div class="panel-body">录入新的报刊登记信息.</div>
                                 <div class="list-group">
                                     <a href="#" class="list-group-item " id="batchInput">
-                                        <span class="badge btn-success">30</span>
-                                        <span class="badge">unknown:400</span>
+                                        <span class="badge btn-success" title="今日录入业务" id="today"></span>
                                         <h4 class="list-group-item-heading">批量录入</h4>
                                         <p class="list-group-item-text">通过文件的方式，系统会尽可能解析文件中的业务数据，一次性录入多条记录。</p>
                                     </a>
-                                    <a href="#" class="list-group-item"><span class="badge">125</span>
+                                    <a href="#" class="list-group-item">
                                         <h4 class="list-group-item-heading">单条录入</h4>
                                         <p class="list-group-item-text">List Group Item Text</p>
                                     </a>
-                                    <a href="#" class="list-group-item">
+                                    <a href="#" class="list-group-item" id="dataView">
+                                        <span class="badge btn-success" title="未到帐业务" id="unarrival"></span>
                                         <h4 class="list-group-item-heading">查看已录入系统的数据</h4>
                                         <p class="list-group-item-text">List Group Item Text</p>
                                     </a>
@@ -182,6 +185,8 @@
                             </div>
                         </div>
                     </div>
+                    <div id="bizChart" style="height:250px;width:100%"></div>
+                    <div id="bizChartRecords" style="height:200px;width:100%"></div>
                 </div>
             </td>
             <td style="vertical-align: top;padding-bottom:100px">
@@ -274,6 +279,50 @@
     </div>
 
     <script>
+        var bizChart = null, bizChartRecords = null;
+
+        function refreshRealtimeInfo() {
+            var text = "";
+            $.ajax({
+                type: 'post',
+                url: 'do.aspx',
+                data: "op=rtinfo",
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    var ms = [];
+                    for (i = 0; i < data.monthStat.length; i++) {
+                        ms.push({
+                            monthId : data.monthStat[i].month,
+                            month: data.monthStat[i].month + "月",
+                            receivable: parseFloat(data.monthStat[i].receivable),
+                            arrival: parseFloat(data.monthStat[i].arrival),
+                            records: parseInt(data.monthStat[i].records)
+                        });
+                    }
+                    bizChart.itemsSource = new wijmo.collections.CollectionView(ms);
+                    bizChartRecords.itemsSource = bizChart.itemsSource;
+                    //text = data.number + " of " + data.total + " processed, " + data.error + " errors";
+                    //if (data.number > 0 && eval(data.number) + eval(data.error) == eval(data.total)) {
+                    //    clearInterval(rti_timer);
+                    //    text += " done!";
+                    //    $("#submitParagraph").attr("disabled", false);
+                    //} else text += ", please wait for a moment ...";
+                    //$("#paragraphInfo").html(text);
+                    if (eval(data.unarrivals.records) > 0)
+                        $("#unarrival").html(data.unarrivals.records + " , ¥ " + data.unarrivals.amount);
+                    else $("#unarrival").html("");
+
+                    if (eval(data.today.records) > 0)
+                        $("#today").html(data.today.records);
+                    else $("#today").html("");
+                },
+                error: function (o, message) {
+                    //$("#paragraphInfo").html(message);
+                }
+            });
+        }
+
         $(document).ready(function () {
 
             $("#search").click(function () {
@@ -284,11 +333,46 @@
                 $("#mainClientArea").load("datainput.aspx");
             });
 
+            $("#dataView").click(function () {
+                $("#mainClientArea").load("dataview.aspx");
+            });
+
             $("#myLoginBtn").click(function () {
                 $("#myLoginModal").modal();
             });
 
+            $(document).on('mousedown', function (e) {
+                if (dataViewer == null || dataViewer.itemsSource == null || dataViewer.itemsSource.items.length < 2
+                    || e.toElement.id == "bottomTipCtrl"
+                    || e.toElement.id == "bottomTip")
+                    return;
 
+                var t = $("#dataViewer").offset().top;
+                var l = $("#dataViewer").offset().left;
+                //var box = $("dataViewer").getBoundingClientRect();
+                var w = $("#dataViewer").width();
+                var h = $("#dataViewer").height();
+                //var content_div = document.getElementById("dataViewer");
+                //var rc = content_div.style.left;
+                //$("#bottomTip").html("x = " + e.pageX
+                //    + ", y=" + e.pageY
+                //    + ", top=" + t
+                //    + ", left=" + l
+                //    + ", width=" + w
+                //    + ", height=" + h
+                //    + ", scroll=" + document.body.scrollTop
+                //    );
+                //+ ",body.scrollLeft=" + document.body.scrollLeft
+                //+ ",body.scrollTop=" + document.body.scrollTop
+                //+ ", div rc.left=" + rc
+                //+ ",bottom=" + content_div.style.bottom);
+                //if (e.clientY + document.body.scrollTop < 500)
+                //$("#bottomTip").html(dataViewer.itemsSource.currentItem.para.text);
+
+                if (e.pageY > t && e.pageY < t + h && e.pageX > l && e.pageX < l + w)
+                    $("#bottomTipCtrl").show();
+                else $("#bottomTipCtrl").hide();
+            });
 
             //// $('[data-toggle="popover"]').popover();  
             //{
@@ -329,6 +413,80 @@
 
             $("#mainClientArea").load("datainput.aspx");
             $("#bottomTipCtrl").hide();
+
+            bizChart = new wijmo.chart.FlexChart('#bizChart', {
+                itemsSource: null,
+                legend: { position: wijmo.chart.Position.Bottom },
+                bindingX: 'month',
+                series: [{
+                    binding: 'receivable',
+                    name: '应收帐款'
+                }, {
+                    binding: 'arrival',
+                    name: '实收帐款'
+                }],
+                selectionMode: wijmo.chart.SelectionMode.Point,
+                selectionChanged: function (e) {
+                    $("#mainClientArea").load("dataview.aspx?month=" + bizChart.selection.collectionView.currentItem.monthId);
+                }
+            });
+
+            bizChartRecords = new wijmo.chart.FlexChart('#bizChartRecords', {
+                itemsSource: null,
+                legend: { position: wijmo.chart.Position.Bottom },
+                bindingX: 'month',
+                series: [{
+                    binding: 'records',
+                    name: '业务量',
+                    chartType: wijmo.chart.ChartType.LineSymbols
+                }],
+                selectionMode: wijmo.chart.SelectionMode.Point,
+                selectionChanged: function (e) {
+                    $("#mainClientArea").load("dataview.aspx?month=" + bizChartRecords.selection.collectionView.currentItem.monthId);
+                }
+            });
+
+            refreshRealtimeInfo();
+
+            var rti_timer = setInterval(refreshRealtimeInfo, 3000);
+
+            //bizChartRecords.addEventListener('click', function () {
+            //    alert("xx");
+            //});
+            //{
+            //    // create some random data
+            //    var countries = 'US,Germany,UK,Japan,Italy,Greece'.split(','),
+            //        data = [];
+            //    for (var i = 0; i < countries.length; i++) {
+            //        data.push({
+            //            country: countries[i],
+            //            downloads: Math.round(Math.random() * 20000),
+            //            sales: Math.random() * 10000,
+            //            expenses: Math.random() * 5000
+            //        });
+            //    }
+
+            //    // create CollectionView on the data (to get events)
+            //    var view = new wijmo.collections.CollectionView(data);
+            //    // initialize the chart
+            //    var chart = new wijmo.chart.FlexChart('#bizChart', {
+            //        itemsSource: view,
+            //        legend: { position: wijmo.chart.Position.Bottom },
+            //        bindingX: 'country',
+            //        series: [{
+            //            binding: 'sales',
+            //            name: 'Sales'
+            //        }, {
+            //            binding: 'expenses',
+            //            name: 'Expenses'
+            //        }, {
+            //            binding: 'downloads',
+            //            name: 'Downloads',
+            //            chartType: wijmo.chart.ChartType.LineSymbols
+            //        }],
+            //        selectionMode: wijmo.chart.SelectionMode.Point
+            //    });
+            //}
         });
     </script>
 </body>

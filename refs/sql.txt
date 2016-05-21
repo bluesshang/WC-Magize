@@ -1,0 +1,6 @@
+﻿SELECT        A.employee, A.[month], A.receivable, A.arrival, B.name AS EmployeeName
+FROM            ((SELECT        employee, DatePart('m', bizTime) AS [month], SUM(receivable) AS receivable, SUM(arrival) AS arrival
+                            FROM            bizdata
+                            WHERE        (DatePart('yyyy', bizTime) = '2016')
+                            GROUP BY DatePart('m', bizTime), employee) A INNER JOIN
+                         employee B ON A.employee = B.id)
