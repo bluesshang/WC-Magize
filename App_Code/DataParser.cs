@@ -57,11 +57,16 @@ public class DataRecordItem
     public NoticeType type;
     public string judge; // 法官
     public string telephone;
+    public int employee;
     public string clerk; // 业务员
     public string title; // 案件名称
     public double receivable;
     public double arrival;
+    public double arrivalOld;
     public string remark;
+    public string publishTime;
+    public int magazine;
+    public string arrivalFrom;
     public DataParagraph para;
 
     public void Reset()
@@ -75,6 +80,12 @@ public class DataRecordItem
         clerk = "";
         remark = "";
         title = "";
+        arrivalFrom = "";
+        employee = 0;
+        magazine = 0;
+        arrivalOld = 0.0;
+        receivable = 0.0;
+        arrival = 0.0;
         type = NoticeType.UNKNOWN;
     }
     public void MakeJson()

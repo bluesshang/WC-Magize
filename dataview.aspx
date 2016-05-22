@@ -2,10 +2,16 @@
 <%@ Page Language="C#" %>
 <%@ import namespace="System" %>
 <%@ import namespace="System.Web.UI" %>
+<%
+    if (Application["userId"] == null)
+    {
+        Response.Redirect("index.aspx", true);
+    }
+%>
 
 <div class="container">
     <h2><span class="glyphicon glyphicon-edit"></span> 浏览、修改已录入的业务数据</h2>
-    <span style="font-size:16px">选定需要查看的日期范围：从</span>
+    <span style="font-size:16px">选定需要查看的登报日期范围：从</span>
     <div id="dateBegin"></div>
     <span>到</span>
     <div id="dateEnd"></div>
@@ -44,6 +50,13 @@
 
     var foldLevel = 1, dateBegin = null, dateEnd = null;
 
+    function refreshModifyInfo(cv)
+    {
+        if (cv.itemsEdited.length > 0 || cv.itemsRemoved.length > 0) {
+            $("#modifyInfos").html("<div class='alert alert-warning'><span class='glyphicon glyphicon-info-sign'></span> 修改记录：修改 " + cv.itemsEdited.length + " 条，删除 " + cv.itemsRemoved.length + " 条。</div>");
+            $("#saveBizdata").attr("disabled", false);
+        }
+    }
     function queryNow()
     {
         $("#modifyInfos").html("");
@@ -65,16 +78,13 @@
                     var cv = new wijmo.collections.CollectionView(data.records);
                     cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
-                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employeeName"));
+                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employeeId"));
                     dataViewer.collapseGroupsToLevel(foldLevel);
 
                     cv.currentChanged.addHandler(function (sender, args) {
                         if (cv.currentItem != null)
                             $("#bottomTip").html(cv.currentItem.para.text);
-                        if (cv.itemsEdited.length > 0 || cv.itemsRemoved.length > 0) {
-                            $("#modifyInfos").html("<div class='alert alert-warning'><span class='glyphicon glyphicon-info-sign'></span> 修改记录：修改 " + cv.itemsEdited.length + " 条，删除 " + cv.itemsRemoved.length + " 条。</div>");
-                            $("#saveBizdata").attr("disabled", false);
-                        }
+                        refreshModifyInfo(cv)
                     });
                 }
             },
@@ -105,146 +115,7 @@
         %>
 
         $("#saveBizdata").attr("disabled", true);
-        //$("#submitParagraph").click(function () {
-        //    //alert("xx");
-        //    //var count = 100;
-        //    //var jdata = [];
 
-        //    //for (var i = 0; i < 100 ; i++) {
-        //    //    jdata.push({
-        //    //        No: "00" + (i + 1).toString(),
-        //    //        ID: "21601" + i.toString(),
-        //    //        EngName: "TingTao Ge",
-        //    //        ChnName: "听涛阁",
-        //    //        MinFloor: 2,
-        //    //        MaxFloor: 12,
-        //    //        State: true,
-        //    //        Date: new Date(2014, i % 12, i % 28),
-        //    //    });
-        //    //}
-
-        //    //var person = [{
-        //    //    name: "Blues",
-        //    //    age:37,
-        //    //    address: "Malianwa North Rd.",
-        //    //    phone: "18610067758"
-        //    //}, {
-        //    //    name: "Candy",
-        //    //    address: "Malianwa North Rd.",
-        //    //    phone: "18610067758",
-        //    //    age:10
-        //    //}];
-        //    //$("#btk_ok").bind('click', function () {
-        //    //alert($("#form1").serialize());
-        //    //$("#proc_info").html("");
-        //    //$("#proc_status").html("committing data ...");
-        //    //$("#submitParagraph").attr("disabled", true);
-        //    //$("#paragraphInfo").html("正在向系统提交数据，共 " + $("#paragraphText").val().length + " 字符。");
-
-        //    //var pb_timer = setInterval(function () {
-        //    //    var text = "";
-        //    //    $.ajax({
-        //    //        type: 'post',
-        //    //        url: 'DataParser.aspx',
-        //    //        data: "get_status=true",
-        //    //        cache: false,
-        //    //        dataType: 'json',
-        //    //        success: function (data) {
-        //    //            text = data.number + " of " + data.total + " processed, " + data.error + " errors";
-        //    //            if (data.number > 0 && eval(data.number) + eval(data.error) == eval(data.total)) {
-        //    //                clearInterval(pb_timer);
-        //    //                text += " done!";
-        //    //                $("#submitParagraph").attr("disabled", false);
-        //    //            } else text += ", please wait for a moment ...";
-        //    //            $("#paragraphInfo").html(text);
-        //    //        },
-        //    //        error: function (o, message) {
-        //    //            $("#paragraphInfo").html(message);
-        //    //        }
-        //    //    });
-        //    //}, 600);
-
-        //    $.ajax({
-        //        type: 'post',
-        //        url: 'DataParser.aspx',
-        //        //data: "data=" + JSON.stringify(person), //$("#form1").serialize(),
-        //        data: $("#frmParagrahInput").serialize(),
-        //        cache: false,
-        //        dataType: 'json',
-        //        success: function (data) {
-        //            //alert('return data len' + data.len);
-        //            //var text = "<b>Total " + data.records.length + " records.</b><br><table border=1>";
-        //            ////alert(data.count + ", records:" + data.records.length);
-        //            //var count = data.records.length;
-        //            //for (i = 0; i < count; i++) {
-        //            //    //alert(data.records[i].accused);
-        //            //    var item = data.records[i];
-        //            //    var para = item.para;
-        //            //    /*
-        //            //    text += "<tr>";
-        //            //    text += "<td colspan=9>[" + para.begin + "," + para.end + "]" + para.text + "</td>";
-        //            //    text += "</tr>";
-
-        //            //    if (data.records[i].status == 0) {
-        //            //        color = "#c5ede8";
-        //            //        if (data.records[i].accused == ""
-        //            //            || data.records[i].accuser == "")
-        //            //            color = "#ffff00";
-        //            //    } else if (data.records[i].status == 2)
-        //            //        color = "#808080";
-        //            //    else color = "#ff0000"
-
-        //            //    text += "<tr style=\"background-color:" + color + "\">";
-        //            //    text += "<td>" + data.records[i].type + "</td>";
-        //            //    text += "<td>" + data.records[i].accused + "</td>";
-        //            //    text += "<td>" + data.records[i].accuser + "</td>";
-        //            //    text += "<td>" + data.records[i].court + "</td>";
-        //            //    text += "<td>" + data.records[i].courtroom + "</td>";
-        //            //    text += "<td>" + data.records[i].telephone + "</td>";
-        //            //    text += "<td>" + data.records[i].title + "</td>";
-        //            //    text += "<td>" + data.records[i].status + "</td>";
-        //            //    text += "<td>" + data.records[i].message + "</td>";
-        //            //    text += "</tr>";*/
-        //            //    parse_records.push({
-        //            //        "业务类型": item.type,
-        //            //        "accused": item.accused,
-        //            //        "accuser": item.accuser,
-        //            //        "court": item.court,
-        //            //        "courtroom": item.courtroom,
-        //            //        "telephone": item.telephone,
-        //            //        "title": item.title,
-        //            //        "status": item.status,
-        //            //        "message": item.message,
-        //            //    });
-        //            //}
-        //            ////////text += "</table>"
-        //            ////////$("#proc_info").html(text);
-        //            var cv = new wijmo.collections.CollectionView(data.records);
-        //            dataViewer.itemsSource = cv;
-        //            //dataViewer.itemsSource.pageSize = 20;
-        //            //dataViewer.itemsSource.moveToNextPage();
-        //            //dataViewer.itemsSource.pageIndex = 3;
-        //            //alert("ok");
-        //            cv.currentChanged.addHandler(function (sender, args) {
-        //                //alert("cv.currentItem = " + cv.currentItem.para.text);
-        //                //$("#bottomTip").show(500);
-        //                //alert(cv.currentItem.para.text);
-        //                $("#bottomTip").html(cv.currentItem.para.text);
-        //            });
-        //            //cv.currentChanged.addHandler(zzzzzzzzz);
-        //        },
-        //        error: function (o, message) {
-        //            alert(message);
-        //        }
-        //    });
-        //});
-
-        //function zzzzzzzzz(sender, args) {
-        //    //alert("cv.currentItem = " + cv.currentItem.para.text);
-        //    //$("#bottomTip").show(500);
-        //    //alert("cv.currentItem.para.text");
-        //    $("#bottomTip").html(dataViewer.itemsSource.currentItem.para.text);
-        //}
         $("#searchNow").click(function () {
             queryNow();
         });
@@ -260,6 +131,17 @@
 
             for (i = 0; i < cv.itemsEdited.length; i++) {
                 modifies.push(cv.itemsEdited[i]);
+                if (cv.itemsEdited[i].publishTime == null) {
+                    alert("登报日期不能为空：ID=" + cv.itemsEdited[i].id);
+                    return;
+                }
+
+                if (cv.itemsEdited[i].receivable == "")
+                    cv.itemsEdited[i].receivable = 88888888;
+                if (cv.itemsEdited[i].arrival == "")
+                    cv.itemsEdited[i].arrival = 88888888;
+                if (cv.itemsEdited[i].arrivalOld == "")
+                    cv.itemsEdited[i].arrivalOld = 88888888;
             }
 
             $.ajax({
@@ -304,6 +186,7 @@
         //$("#paragraphText").on('keyup', function () {
         //    $("#paragraphInfo").html("共 " + $("#paragraphText").val().length + " 字符。");
         //});
+        var lockField = <%=((int)Application["userLevel"] == 0 ? "false" : "true")%>;
 
         dataViewer = new wijmo.grid.FlexGrid('#dataViewer', {
             showSelectedHeaders: 'All',
@@ -317,22 +200,30 @@
             //allowAddNew: true,
             columns: [
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
+                { header: 'ID', binding: 'id', width: 80 },
                 { header: '类型', binding: 'type', width: 100 },
-                { header: '业务员', binding: 'employeeName', width: 100, isReadOnly: true },
-                { header: '被告', binding: 'accused' },
-                { header: '原告', binding: 'accuser' },
-                { header: '法院', binding: 'court' },
-                { header: '法庭', binding: 'courtRoom' },
+                { header: '登报日期', binding: 'publishTime', dataType: "Date", isReadOnly: lockField},
+                { header: '报刊类型', binding: 'magazine', isReadOnly: lockField},
+                { header: '业务员', binding: 'employee', width: 100, isReadOnly: lockField, visible: !lockField},
+                { header: '被告', binding: 'accused', isReadOnly: lockField },
+                { header: '原告', binding: 'accuser', isReadOnly: lockField },
+                { header: '法院', binding: 'court', isReadOnly: lockField },
+                { header: '法庭', binding: 'courtRoom', isReadOnly: lockField },
+                { header: '案件类型', binding: 'title', isReadOnly: lockField },
                 { header: '法官', binding: 'judge' },
-                { header: '案件类型', binding: 'title' },
                 { header: '电话', binding: 'telephone' },
-                { header: '日期', binding: 'date', dataType: "Date", minWidth: 50, isReadOnly: true },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
-                { header: '到账日期', binding: 'arrivalTime', dataType: "Date", minWidth: 50, isReadOnly: true },
+                { header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c' },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c' },
+                { header: '到账日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true },
+                { header: '来款途径', binding: 'arrivalFrom' },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
                 { header: '备注', binding: 'remark'}
-            ]
+            ],
+            cellEditEnded: function (e) {
+                //alert(dataViewer.itemsSource.itemsEdited.length);
+                refreshModifyInfo(dataViewer.itemsSource);
+            }
             //new wijmo.odata.ODataCollectionView(
             //'http://services.odata.org/V4/Northwind/Northwind.svc/',
             //'Order_Details_Extendeds'),
@@ -365,8 +256,10 @@
             queryNow();
         });
 
-        var typeMapping = new wijmo.grid.DataMap(bizTypes, "id", "name");
-        dataViewer.columns.getColumn('type').dataMap = typeMapping;;
+        dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
+        dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
+        dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
+
         dataViewer.__grphdrExtInfo = function (g, fld, rs) {
             //return fld + " ==> " + rs.length;
             var totalReceivable = 0.0,

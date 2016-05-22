@@ -78,7 +78,7 @@ div[wj-part='root'] {
 }
 
 .wj-group:not(.wj-state-selected):not(.wj-state-multi-selected) {
-    background: #2a377c;
+    background: #424245;
     color: #fff
 }
 

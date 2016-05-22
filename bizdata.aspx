@@ -1,5 +1,15 @@
 ﻿<%@ Page Language="C#" %>
 
+<%@ Import Namespace="System" %>
+<%@ Import Namespace="System.Web.UI" %>
+
+<%
+    if (Application["userId"] == null)
+    {
+        Response.Redirect("index.aspx", true);
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -89,7 +99,7 @@
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-user"></span> 刘志杰(admin) <span class="caret"></span>
+                            <span class="glyphicon glyphicon-user"></span> <%=Application["userFullName"] + "(" + Application["userName"] + ")" %> <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="#">修改密码</a></li>
@@ -97,7 +107,7 @@
                             <li><a href="#">...</a></li>
                         </ul>
                     </li>
-                    <li><a href="index.aspx"><span class="glyphicon glyphicon-log-out"></span> 退出系统 </a></li>
+                    <li><a href="do.aspx?op=logout"><span class="glyphicon glyphicon-log-out"></span> 退出系统 </a></li>
                 </ul>
             </div>
         </div>
@@ -132,7 +142,7 @@
                                         <p class="list-group-item-text">List Group Item Text</p>
                                     </a>
                                     <a href="#" class="list-group-item" id="dataView">
-                                        <span class="badge btn-success" title="未到帐业务" id="unarrival"></span>
+                                        <span class="badge btn-danger" title="未到帐业务" id="unarrival"></span>
                                         <h4 class="list-group-item-heading">查看已录入系统的数据</h4>
                                         <p class="list-group-item-text">List Group Item Text</p>
                                     </a>

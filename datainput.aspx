@@ -1,5 +1,11 @@
 
 <%@ Page Language="C#" %>
+<%
+    if (Application["userId"] == null)
+    {
+        Response.Redirect("index.aspx", true);
+    }
+%>
 
 <div class="container">
     <ul class="nav nav-tabs">
@@ -207,11 +213,26 @@
             //    phone: "18610067758",
             //    age:10
             //}];
+            var items = dataViewer.itemsSource.items;
+            for (i = 0; i < items.length; i++) {
+                if (items[i].publishTime == null) {
+                    alert("登报日期不能为空：ID=" + items[i].id);
+                    return;
+                }
+                if (items[i].employee == null) {
+                    alert("业务员不能为空：ID=" + items[i].id);
+                    return;
+                }
+                if (items[i].receivable == "")
+                    items[i].receivable = 88888888;
+                if (items[i].arrival == "")
+                    items[i].arrival = 88888888;
+            }
 
             $.ajax({
                 type: 'post',
                 url: 'do.aspx',
-                data: "op=save&employeeId=4&data=" + JSON.stringify(dataViewer.itemsSource.items), //$("#form1").serialize(),
+                data: "op=save&data=" + JSON.stringify(dataViewer.itemsSource.items), //$("#form1").serialize(),
                 //data: "op=new&data=" + JSON.stringify(person), //$("#form1").serialize(),
                 //data: $("#frmParagrahInput").serialize(),
                 cache: false,
@@ -276,7 +297,11 @@
             //sortRowIndex:true,
             //allowAddNew: true,
             columns: [
-                { header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
+                { header: '-', binding: 'valid', width: 30, format: 'b', dataType: "Boolean" },
+                { header: 'ID', binding: 'id', width: 100 },
+                { header: '登报日期', binding: 'publishTime', dataType: "Date", width: 100 },
+                { header: '报刊类型', binding: 'magazine' },
+                { header: '业务员', binding: 'employee' },
                 { header: '类型', binding: 'type', width:100 },
                 { header: '被告', binding: 'accused'},
                 { header: '原告', binding: 'accuser'},
@@ -284,10 +309,11 @@
                 { header: '法庭', binding: 'courtRoom' },
                 { header: '法官', binding: 'judge' },
                 { header: '案件类型', binding: 'title'},
-                { header: '电话', binding: 'telephone'},
+                { header: '电话', binding: 'telephone' },
                 { header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
                 { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', minWidth:20, maxWidth:40 },
                 { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
+                { header: '来款途径', binding: 'arrivalFrom' },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
                 { header: '备注', binding: 'remark'},
                 { header: '解析结果', binding: 'message', isReadOnly: true }
@@ -297,8 +323,9 @@
             //'Order_Details_Extendeds'),
         });
 
-        var typeMapping = new wijmo.grid.DataMap(bizTypes, "id", "name");
-        dataViewer.columns.getColumn('type').dataMap = typeMapping;;
+        dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
+        dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
+        dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);
     });
