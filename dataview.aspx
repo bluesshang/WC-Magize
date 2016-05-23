@@ -32,9 +32,27 @@
                     <li data-toggle="pill" id="viewDay"><a href="#">当天</a></li>
                 </ul>
             </td>
+            <td>
+                <input id="pagingInput" type="text" class="form-control col-md-1" placeholder="0 or empty is for no paging." value="10" />
+                <button type="button" class="btn btn-default" id="btnMoveToFirstPage">
+                  <span class="glyphicon glyphicon-fast-backward"></span>
+                </button>
+                <button type="button" class="btn btn-default" id="btnMoveToPreviousPage">
+                  <span class="glyphicon glyphicon-step-backward"></span>
+                </button>
+                <button type="button" class="btn btn-default" disabled style="width:100px" id="btnCurrentPage">
+                </button>
+                <button type="button" class="btn btn-default" id="btnMoveToNextPage">
+                  <span class="glyphicon glyphicon-step-forward"></span>
+                </button>
+                <button type="button" class="btn btn-default" id="btnMoveToLastPage">
+                  <span class="glyphicon glyphicon-fast-forward"></span>
+                </button>
+            </td>
         </tr>
     </table>
 </div>
+
 <div class="container">
     <p></p>
     <!--div style="border:1px solid red"-->
@@ -78,7 +96,7 @@
                     var cv = new wijmo.collections.CollectionView(data.records);
                     cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
-                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employeeId"));
+                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employee"));
                     dataViewer.collapseGroupsToLevel(foldLevel);
 
                     cv.currentChanged.addHandler(function (sender, args) {
@@ -260,21 +278,99 @@
         dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
         dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
-        dataViewer.__grphdrExtInfo = function (g, fld, rs) {
+        dataViewer.__grphdrExtInfo = function (fld, val, fldDisp, valDisp, rs) {
             //return fld + " ==> " + rs.length;
             var totalReceivable = 0.0,
-                totalArrival = 0.0;
-            for (i = 0; i < rs.length; i++) {
-                totalReceivable += eval(rs[i].receivable);
-                totalArrival += eval(rs[i].arrival);
+                totalArrival = 0.0,
+                totalUnarrival = 0.0,
+                n = 0;
+            //for (i = 0; i < rs.length; i++) {
+            var fullRs = dataViewer.itemsSource.sourceCollection;
+
+            for (i = 0; i < fullRs.length; i++) {
+                if (fullRs[i].employee != eval(val))
+                    continue;
+                totalReceivable += (fullRs[i].receivable == "" ? 0 : eval(fullRs[i].receivable));
+                if (fullRs[i].arrival != "")
+                    totalArrival += eval(fullRs[i].arrival);
+                else totalUnarrival += 1;
+                n += 1;
             }
-            return "<span> 应收帐款共计： "
-                + g.Globalize.formatNumber(totalReceivable, 'c') + "，实收： "
-                + g.Globalize.formatNumber(totalArrival, 'c') + "</span>";
+            return "<span>" + fldDisp + ":" + valDisp + " (" + n + " 项目, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
+                + "，实收： " + wijmo.Globalize.formatNumber(totalArrival, 'c') 
+                + "，未到帐： " + totalUnarrival + " 笔)"
+                + "</span>";
         }
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);
 
         queryNow();
+
+        $("#pagingInput").on('blur', function () {
+            dataViewer.itemsSource.pageSize = wijmo.Globalize.parseInt(
+                this.value == "" ? "0" : this.value);
+            updateNaviagteButtons();
+        });
+
+        var     btnFirstPage = document.getElementById('btnMoveToFirstPage'),
+    btnPreviousPage = document.getElementById('btnMoveToPreviousPage'),
+    btnNextPage = document.getElementById('btnMoveToNextPage'),
+    btnLastPage = document.getElementById('btnMoveToLastPage'),
+    btnCurrentPage = document.getElementById('btnCurrentPage');
+        function updateNaviagteButtons() {
+            var cv = dataViewer.itemsSource;
+            if (cv.pageSize <= 0) {
+                //document.getElementById('naviagtionPage').style.display = 'none';
+                return;
+            }
+
+            //document.getElementById('naviagtionPage').style.display = 'block';
+
+            if (cv.pageIndex === 0) {
+                btnFirstPage.setAttribute('disabled', 'disabled');
+                btnPreviousPage.setAttribute('disabled', 'disabled');
+                btnNextPage.removeAttribute('disabled');
+                btnLastPage.removeAttribute('disabled');
+            } else if (cv.pageIndex === (cv.pageCount - 1)) {
+                btnFirstPage.removeAttribute('disabled');
+                btnPreviousPage.removeAttribute('disabled');
+                btnLastPage.setAttribute('disabled', 'disabled');
+                btnNextPage.setAttribute('disabled', 'disabled');
+            } else {
+                btnFirstPage.removeAttribute('disabled');
+                btnPreviousPage.removeAttribute('disabled');
+                btnNextPage.removeAttribute('disabled');
+                btnLastPage.removeAttribute('disabled');
+            }
+
+            btnCurrentPage.innerHTML = (cv.pageIndex + 1) + ' / ' + cv.pageCount;
+        }
+
+        // commands: moving page.
+        btnFirstPage.addEventListener('click', function () {
+            // move to the first page.
+            dataViewer.itemsSource.moveToFirstPage();
+            updateNaviagteButtons();
+        });
+
+        btnPreviousPage.addEventListener('click', function () {
+            // move to the previous page.
+            dataViewer.itemsSource.moveToPreviousPage();
+            updateNaviagteButtons();
+        });
+
+        btnNextPage.addEventListener('click', function () {
+            // move to the next page.
+            dataViewer.itemsSource.moveToNextPage();
+            updateNaviagteButtons();
+        });
+
+        btnLastPage.addEventListener('click', function () {
+            // move to the last page.
+            dataViewer.itemsSource.moveToLastPage();
+            updateNaviagteButtons();
+        });
+        
+        //updateNaviagteButtons();
     });
 </script>

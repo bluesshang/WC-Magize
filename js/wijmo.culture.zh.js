@@ -49,7 +49,7 @@ var wijmo;
             itemsSelected: '选定{count:n0}个项目'
         },
         FlexGrid: {
-            groupHeaderFormat: ' {name}：<b>{value} </b>（{count:n0} 项目， {extinfo}）'
+            groupHeaderFormat: ' {name}：<b>{value} </b>（{count:n0} 项目）'
         },
         FlexGridFilter: {
             // filter

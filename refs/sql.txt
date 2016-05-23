@@ -4,3 +4,57 @@ FROM            ((SELECT        employee, DatePart('m', bizTime) AS [month], SUM
                             WHERE        (DatePart('yyyy', bizTime) = '2016')
                             GROUP BY DatePart('m', bizTime), employee) A INNER JOIN
                          employee B ON A.employee = B.id)
+                         
+
+SELECT        A.m, A.Expr1, B.m AS Expr2, B.Expr1 AS Expr3
+FROM            (SELECT        DatePart('m', arrivalTime) AS m, SUM(arrival) AS Expr1
+                            FROM            bizdata
+                            WHERE        (DatePart('yyyy', arrivalTime) = '2016')
+                            GROUP BY DatePart('m', arrivalTime)) A ,
+                             (SELECT        DatePart('m', bizTime) AS m, SUM(receivable) AS Expr1
+                               FROM            bizdata bizdata_1
+                               WHERE        (DatePart('yyyy', bizTime) = '2016')
+                               GROUP BY DatePart('m', bizTime)) B where A.m = B.m                         
+
+SELECT        A.m, A.arrival, B.m AS Expr2, B.receivable
+FROM            ((SELECT        DatePart('m', arrivalTime) AS m, SUM(arrival) AS arrival
+                            FROM            bizdata
+                            WHERE        (DatePart('yyyy', arrivalTime) = '2016')
+                            GROUP BY DatePart('m', arrivalTime)) A RIGHT OUTER JOIN
+                             (SELECT        DatePart('m', bizTime) AS m, SUM(receivable) AS receivable
+                               FROM            bizdata bizdata_1
+                               WHERE        (DatePart('yyyy', bizTime) = '2016')
+                               GROUP BY DatePart('m', bizTime)) B ON A.m = B.m)                               
+                               
+                               
+SELECT        DatePart('m', arrivalTime) AS m, SUM(arrival) AS Expr1
+                            FROM            bizdata
+                            WHERE        (DatePart('yyyy', arrivalTime) = '2016')
+                            GROUP BY DatePart('m', arrivalTime)) A 
+            union all
+             (SELECT        DatePart('m', bizTime) AS m, SUM(receivable) AS Expr1
+               FROM            bizdata bizdata_1
+               WHERE        (DatePart('yyyy', bizTime) = '2016')
+               GROUP BY DatePart('m', bizTime)
+
+SELECT B.[month], A.arrival, B.receivable
+FROM ((SELECT DatePart('m', arrivalTime) AS [month], SUM(arrival) AS arrival
+       FROM bizdata
+       WHERE (DatePart('yyyy', arrivalTime) = '2016')
+       GROUP BY DatePart('m', arrivalTime)) A 
+     RIGHT OUTER JOIN
+      (SELECT DatePart('m', bizTime) AS [month], SUM(receivable) AS receivable
+       FROM bizdata 
+       WHERE (DatePart('yyyy', bizTime) = '2016')
+       GROUP BY DatePart('m', bizTime)) B 
+		ON A.[month] = B.[month])
+
+SELECT        B.[month], A.arrival, B.receivable, A.records, B.records AS Expr1
+FROM            ((SELECT        DatePart('m', arrivalTime) AS [month], SUM(arrival) AS arrival, COUNT(*) AS records
+                            FROM            bizdata
+                            WHERE        (DatePart('yyyy', arrivalTime) = '2016')
+                            GROUP BY DatePart('m', arrivalTime)) A RIGHT OUTER JOIN
+                             (SELECT        DatePart('m', bizTime) AS [month], SUM(receivable) AS receivable, COUNT(*) AS records
+                               FROM            bizdata bizdata_1
+                               WHERE        (DatePart('yyyy', bizTime) = '2016')
+                               GROUP BY DatePart('m', bizTime)) B ON A.[month] = B.[month])                                              
