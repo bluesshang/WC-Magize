@@ -42,7 +42,7 @@
     </nav>
 
 
-    <div class="container">
+    <div class="container" id="mainBox">
         <h2>欢迎使用文萃报刊信息登记系统</h2>
         <!-- Trigger the modal with a button -->
         <!--p><span class="glyphicon glyphicon-log-in"></span>请登录 ...</!--p-->
@@ -111,9 +111,12 @@ $(document).ready(function(){
             }
         });
     });
-        
+
+    //alert(navigator.userAgent);
     //$("#myLoginModal").modal();
-    
+    if (navigator.userAgent.indexOf("Chrome") < 0) {
+        $("#mainBox").html("<h3>请使用Google Chrome浏览器访问本系统！</h3> <br><br> 点击 <a href='tools/ChromeStandalone_50.0.2661.102_Setup.exe'>这里</a> 下载并安装，如果你已经安装，请在Chrome浏览器中访问本系统。");
+    }
     // $('[data-toggle="popover"]').popover();  
 });
 </script>

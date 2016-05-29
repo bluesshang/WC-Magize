@@ -1,7 +1,7 @@
 
 <%@ Page Language="C#" %>
 <%
-    if (Application["userId"] == null)
+    if (Session["userId"] == null)
     {
         Response.Redirect("index.aspx", true);
     }
@@ -106,7 +106,7 @@
                     dataType: 'json',
                     success: function (data) {
                         text = data.number + " of " + data.total + " processed, " + data.error + " errors";
-                        if (data.number > 0 && eval(data.number) + eval(data.error) == eval(data.total)) {
+                        if (data.number > 0 && eval(data.number) + eval(data.error) == eval(data.total) || eval(data.total) == 0) {
                             clearInterval(pb_timer);
                             text += " done!";
                             $("#submitParagraph").attr("disabled", false);
@@ -114,6 +114,8 @@
                         $("#paragraphInfo").html(text);
                     },
                     error: function (o, message) {
+                        $("#submitParagraph").attr("disabled", false);
+                        clearInterval(pb_timer);
                         $("#paragraphInfo").html(message);
                     }
                 });
@@ -180,6 +182,8 @@
                     //dataViewer.itemsSource.moveToNextPage();
                     //dataViewer.itemsSource.pageIndex = 3;
                     //alert("ok");
+                    dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(data.employees, "id", "name");
+
                     cv.currentChanged.addHandler(function (sender, args) {
                         //alert("cv.currentItem = " + cv.currentItem.para.text);
                         //$("#bottomTip").show(500);
@@ -189,6 +193,8 @@
                     //cv.currentChanged.addHandler(zzzzzzzzz);
                 },
                 error: function (o, message) {
+                    $("#submitParagraph").attr("disabled", false);
+                    clearInterval(pb_timer);
                     alert(message);
                 }
             });
@@ -239,9 +245,13 @@
                 dataType: 'json',
                 success: function (data) {
                     if (eval(data.status) == 0) {
+                        var info = "总共成功保存 " + data.successNum + " 条业务数据。";
                         dataViewer.itemsSource = null;
                         $("#msgboxTitle").html("<span class=\"glyphicon glyphicon-ok\"/> 业务数据保存成功");
-                        $("#msgboxBody").html("总共成功保存 " + data.successNum + " 条业务数据。[message: " + data.message + "]");
+                        if (eval(data.errorNum) > 0) {
+                            info += "以下 " + data.errorNum + " 条数据未能成功保存：" + data.errorParas;
+                        }
+                        $("#msgboxBody").html(info);
                         $("#msgbox").modal();
                     }
                 },
@@ -295,10 +305,11 @@
             autoGenerateColumns: false,
             //autoSizeMode:true,
             //sortRowIndex:true,
+            allowDelete: true,
             //allowAddNew: true,
             columns: [
                 { header: '-', binding: 'valid', width: 30, format: 'b', dataType: "Boolean" },
-                { header: 'ID', binding: 'id', width: 100 },
+                { header: '#ID', binding: 'id', width: 100 },
                 { header: '登报日期', binding: 'publishTime', dataType: "Date", width: 100 },
                 { header: '报刊类型', binding: 'magazine' },
                 { header: '业务员', binding: 'employee' },
@@ -324,7 +335,7 @@
         });
 
         dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
-        dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
+        //dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
         dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);

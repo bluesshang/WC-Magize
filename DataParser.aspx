@@ -1,5 +1,5 @@
 
-<%@ Page Language="C#" %>
+<%@ Page Language="C#" ValidateRequest="False"  %>
 
 <%@ import namespace="System" %>
 <%@ import namespace="System.Data" %>
@@ -37,9 +37,9 @@
 
         if (Request["get_status"] == "true")
         {
-            Response.Write("{\"number\":\"" + Application["_ok_records"]
-                + "\",\"error\":\"" + Application["_error_records"]
-                + "\",\"total\":\"" + Application["_total_records"] + "\"}");
+            Response.Write("{\"number\":\"" + Session["_ok_records"]
+                + "\",\"error\":\"" + Session["_error_records"]
+                + "\",\"total\":\"" + Session["_total_records"] + "\"}");
             return;
         }
 
@@ -47,14 +47,16 @@
 
         DataParagrapher paragraph = new DataParagrapher();
 
+        dbutil db = new dbutil();
+        
         int ok = 0, err = 0;
         int count = paragraph.DoParagraph(bizData);
 
         //_processed_records = 0;
         //_total_records = count;
-        Application["_ok_records"] = 0;
-        Application["_error_records"] = 0;
-        Application["_total_records"] = count;
+        Session["_ok_records"] = 0;
+        Session["_error_records"] = 0;
+        Session["_total_records"] = count;
         //Response.ContentType = "text/plain";
         //Response.Write("{\"type\":\"status\",\"message\":\"total " + count + "paragraphs will be processed.\"}");
         //Response.Flush();
@@ -65,6 +67,7 @@
         string json = "{\n"
             + "  \"type\": \"data\",\n"
             + "  \"count\": \"" + count + "\",\n"
+            + "  \"employees\": [" + db.getEmployeeId2NameMapping() + "],\n"
             + "  \"records\": [\n";
 
         for (int i = 0; i < count; i++)
@@ -79,7 +82,8 @@
                 char[] trimChars = { '\r', ' ', '.', '¡£', ';', '£»' };
                 string data = para.text
                     .Trim(trimChars)
-                    .Replace(" ", "");
+                    .Replace(" ", "")
+                    .Replace("\t", "");
 
                 dri.Reset();
 
@@ -91,13 +95,13 @@
                 message = "OK";
                 //_processed_records += 1;
 
-                Application["_ok_records"] = ++ok;
+                Session["_ok_records"] = ++ok;
             }
             catch (DataParseException e)
             {
                 status = e.code;
                 message = "½âÎö³öÏÖ´íÎó:" + e.Message.Replace("\r\n", "<br>");
-                Application["_error_records"] = ++err;
+                Session["_error_records"] = ++err;
             }
 
             json += "{"
@@ -115,6 +119,7 @@
                 + ", \"status\":\"" + (int)status + "\""
                 + ", \"receivable\":\"\""
                 + ", \"arrival\":\"\""
+                + ", \"employee\":\"" + db.guessEmployeeByCourt(dri.court) + "\""
                 + ", \"magazine\":\"0\""
                 + ", \"arrivalFrom\":\"\""
                 + ", \"remark\":\"\""
@@ -130,7 +135,8 @@
         }
 
         json += "]}";
-
+        db.close();
+        
         Response.Write(json);        
     }
 </script>

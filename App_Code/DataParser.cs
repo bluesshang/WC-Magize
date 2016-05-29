@@ -68,6 +68,9 @@ public class DataRecordItem
     public int magazine;
     public string arrivalFrom;
     public DataParagraph para;
+    public string invoiceNumber;
+    public string magazinePage;
+    public string courtAddress;
 
     public void Reset()
     {
@@ -86,6 +89,9 @@ public class DataRecordItem
         arrivalOld = 0.0;
         receivable = 0.0;
         arrival = 0.0;
+        invoiceNumber = "";
+        magazinePage = "";
+        courtAddress = "";
         type = NoticeType.UNKNOWN;
     }
     public void MakeJson()

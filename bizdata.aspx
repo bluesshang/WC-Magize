@@ -4,7 +4,7 @@
 <%@ Import Namespace="System.Web.UI" %>
 
 <%
-    if (Application["userId"] == null)
+    if (Session["userId"] == null)
     {
         Response.Redirect("index.aspx", true);
     }
@@ -54,13 +54,13 @@
     <script src="js/wijmo.odata.min.js"></script>
     <script src="js/wijmo.olap.min.js"></script>
 
+    <script src="js/wijmo.culture.zh.js"></script>
+
     <!--link href="http://cdn.wijmo.com/themes/aristo/jquery-wijmo.css" rel="stylesheet" type="text/css" />
 			<link href="http://cdn.wijmo.com/jquery.wijmo-pro.all.3.20132.15.min.css" rel="stylesheet" type="text/css" />
 			<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.min.js" type="text/javascript"></script>
 			<script src="http://cdn.wijmo.com/jquery.wijmo-open.all.3.20132.15.min.js" type="text/javascript"></script>
 			<script src="http://cdn.wijmo.com/jquery.wijmo-pro.all.3.20132.15.min.js" type="text/javascript"></script-->
-
-    <script src="js/wijmo.culture.zh.js"></script>
 
     <link rel="stylesheet" href="css/app.css">
     <script src="js/app.js"></script>
@@ -99,7 +99,7 @@
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-user"></span> <%=Application["userFullName"] + "(" + Application["userName"] + ")" %> <span class="caret"></span>
+                            <span class="glyphicon glyphicon-user"></span> <%=Session["userFullName"] + "(" + Session["userName"] + ")" %> <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="#">修改密码</a></li>
@@ -119,7 +119,7 @@
 
     <table border="0" style="width:100%">
         <tr>
-            <td style="width: 25%; min-width: 300px; max-width: 500px; margin-left: 5px; vertical-align: top;">
+            <td style="width: 20%; min-width: 200px; max-width: 300px; margin-left: 5px; vertical-align: top;">
                 <div style="padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto;">
                     <!--h2>Accordion Example</!--h2>
                     <p><strong>Note:</strong> The <strong>data-parent</strong> attribute makes sure that all collapsible elements under the specified parent will be closed when one of the collapsible item is shown.</p-->
@@ -127,6 +127,7 @@
                         <div class="panel panel-primary">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-copy"></span>
                                     <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">业务数据录入</a>
                                 </h4>
                             </div>
@@ -134,17 +135,17 @@
                                 <div class="list-group">
                                     <a href="#" class="list-group-item " id="batchInput">
                                         <span class="badge btn-success" title="今日录入业务" id="today"></span>
-                                        <h4 class="list-group-item-heading">批量录入</h4>
-                                        <p class="list-group-item-text">通过文件的方式，系统会尽可能解析文件中的业务数据，一次性录入多条记录。</p>
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-duplicate"></span> 批量录入</h4>
+                                        <p class="list-group-item-text">系统尽可能自动解析输入数据中的业务数据，一次性录入多条记录。</p>
                                     </a>
-                                    <a href="#" class="list-group-item">
-                                        <h4 class="list-group-item-heading">单条录入</h4>
-                                        <p class="list-group-item-text">List Group Item Text</p>
+                                    <a href="#" class="list-group-item" id="singleInput">
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-list-alt"></span> 单条录入</h4>
+                                        <p class="list-group-item-text">一次录入一条记录（暂未实现）</p>
                                     </a>
                                     <a href="#" class="list-group-item" id="dataView">
                                         <span class="badge btn-danger" title="未到帐业务" id="unarrival"></span>
-                                        <h4 class="list-group-item-heading">查看已录入系统的数据</h4>
-                                        <p class="list-group-item-text">List Group Item Text</p>
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-edit"></span> 查看已录入系统的数据</h4>
+                                        <p class="list-group-item-text">查看或修改业务数据</p>
                                     </a>
                                 </div>
                             </div>
@@ -152,46 +153,37 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-align-left"></span>
                                     <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">业务统计</a>
                                 </h4>
                             </div>
                             <div id="collapse2" class="panel-collapse collapse">
                                 <div class="panel-body">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-			        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </div>
-                                <div class="panel-body">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-			        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </div>
-                                <div class="panel-body">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-			        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </div>
-                                <div class="panel-body">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-			        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                </div>
-                                <div class="panel-body">
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-			        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                    TODO
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" id="sysMgr">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-cog"></span>
-                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">系统维护</a>
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse3"><b>系统维护</b></a>
                                 </h4>
                             </div>
                             <div id="collapse3" class="panel-collapse collapse">
                                 <div class="panel-body">对系统的运行参数进行调整和用户进行管理.</div>
+                                <div class="panel-collapse collapse in">
+                                    <div class="list-group">
+                                        <a href="#" class="list-group-item " id="userMgr">
+                                            <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-user"></span> 用户管理</h4>
+                                            <p class="list-group-item-text">增加、修改用户信息。</p>
+                                        </a>
+                                        <a href="#" class="list-group-item" id="regionMgr">
+                                            <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-globe"></span> 用户业务区域管理</h4>
+                                            <p class="list-group-item-text">设置业务员的业务区域范围</p>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -289,6 +281,8 @@
     </div>
 
     <script>
+        var level = <%=(int)Session["userLevel"]%>;
+
         var bizChart = null, bizChartRecords = null;
 
         function refreshRealtimeInfo() {
@@ -345,6 +339,14 @@
 
             $("#dataView").click(function () {
                 $("#mainClientArea").load("dataview.aspx");
+            });
+
+            $("#userMgr").click(function () {
+                $("#mainClientArea").load("usermgr.aspx");
+            });
+
+            $("#regionMgr").click(function () {
+                $("#mainClientArea").load("regionmgr.aspx");
             });
 
             $("#myLoginBtn").click(function () {
@@ -421,7 +423,6 @@
                 simpleModeCommands: ["Bold", "Italic", "FontName", "FontSize", "InsertImage", "NumberedList", "BulletedList", "Undo"]
             });    */
 
-            $("#mainClientArea").load("datainput.aspx");
             $("#bottomTipCtrl").hide();
 
             bizChart = new wijmo.chart.FlexChart('#bizChart', {
@@ -497,6 +498,16 @@
             //        selectionMode: wijmo.chart.SelectionMode.Point
             //    });
             //}
+
+            if (level > 2) {
+                $("#batchInput").hide();
+                $("#singleInput").hide();
+                $("#mainClientArea").load("dataview.aspx");
+            } else {
+                $("#mainClientArea").load("datainput.aspx");
+            }
+            if (level != 0)
+                $("#sysMgr").hide();
         });
     </script>
 </body>

@@ -3,7 +3,7 @@
 <%@ import namespace="System" %>
 <%@ import namespace="System.Web.UI" %>
 <%
-    if (Application["userId"] == null)
+    if (Session["userId"] == null)
     {
         Response.Redirect("index.aspx", true);
     }
@@ -27,13 +27,24 @@
             <td>&nbsp;</td>
             <td>
                 <ul class="nav nav-pills nav-pills-ext">
-                    <li data-toggle="pill" class="active" id="viewYear"><a href="#">当年</a></li>
-                    <li data-toggle="pill" id="viewMonth"><a href="#">当月</a></li>
+                    <li data-toggle="pill"id="viewYear"><a href="#">当年</a></li>
+                    <li data-toggle="pill" class="active"  id="viewMonth"><a href="#">当月</a></li>
                     <li data-toggle="pill" id="viewDay"><a href="#">当天</a></li>
                 </ul>
             </td>
             <td>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="container">
+    <p></p>
+    <div style="padding-bottom:10px">
+        <table>
+            <tr><td>
                 <input id="pagingInput" type="text" class="form-control col-md-1" placeholder="0 or empty is for no paging." value="10" />
+                </td><td>&nbsp;</td><td>
                 <button type="button" class="btn btn-default" id="btnMoveToFirstPage">
                   <span class="glyphicon glyphicon-fast-backward"></span>
                 </button>
@@ -48,13 +59,9 @@
                 <button type="button" class="btn btn-default" id="btnMoveToLastPage">
                   <span class="glyphicon glyphicon-fast-forward"></span>
                 </button>
-            </td>
-        </tr>
-    </table>
-</div>
-
-<div class="container">
-    <p></p>
+                </td></tr>
+            </table>
+        </div>
     <!--div style="border:1px solid red"-->
     <div id="dataViewer" class="panel panel-primary"></div>
     <div id="modifyInfos"></div>
@@ -75,6 +82,42 @@
             $("#saveBizdata").attr("disabled", false);
         }
     }
+
+    var btnFirstPage = document.getElementById('btnMoveToFirstPage'),
+        btnPreviousPage = document.getElementById('btnMoveToPreviousPage'),
+        btnNextPage = document.getElementById('btnMoveToNextPage'),
+        btnLastPage = document.getElementById('btnMoveToLastPage'),
+        btnCurrentPage = document.getElementById('btnCurrentPage');
+
+    function updateNaviagteButtons() {
+        var cv = dataViewer.itemsSource;
+        if (cv.pageSize <= 0) {
+            //document.getElementById('naviagtionPage').style.display = 'none';
+            return;
+        }
+
+        //document.getElementById('naviagtionPage').style.display = 'block';
+
+        if (cv.pageIndex === 0) {
+            btnFirstPage.setAttribute('disabled', 'disabled');
+            btnPreviousPage.setAttribute('disabled', 'disabled');
+            btnNextPage.removeAttribute('disabled');
+            btnLastPage.removeAttribute('disabled');
+        } else if (cv.pageIndex === (cv.pageCount - 1)) {
+            btnFirstPage.removeAttribute('disabled');
+            btnPreviousPage.removeAttribute('disabled');
+            btnLastPage.setAttribute('disabled', 'disabled');
+            btnNextPage.setAttribute('disabled', 'disabled');
+        } else {
+            btnFirstPage.removeAttribute('disabled');
+            btnPreviousPage.removeAttribute('disabled');
+            btnNextPage.removeAttribute('disabled');
+            btnLastPage.removeAttribute('disabled');
+        }
+
+        btnCurrentPage.innerHTML = (cv.pageIndex + 1) + ' / ' + cv.pageCount;
+    }
+
     function queryNow()
     {
         $("#modifyInfos").html("");
@@ -99,15 +142,25 @@
                     cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employee"));
                     dataViewer.collapseGroupsToLevel(foldLevel);
 
+                    dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(data.employees, "id", "name");
+
                     cv.currentChanged.addHandler(function (sender, args) {
                         if (cv.currentItem != null)
                             $("#bottomTip").html(cv.currentItem.para.text);
                         refreshModifyInfo(cv)
                     });
+
+                    cv.pageSize = 10;
+                    updateNaviagteButtons();
                 }
             },
-            error: function (o, message) {
-                alert(message);
+            error: function (o, message, errInfos) {
+                //alert(message + "\n" + errInfos.message + "\n" + errInfos.stack);
+                //throw "too high";
+                $("#msgboxTitle").html("<span class=\"glyphicon glyphicon-remove\"/> 操作出现错误");
+                //$("#msgboxBody").html("" + message + ":" + errInfos.message + "<br/><code>" + errInfos.stack + "</code>");
+                $("#msgboxBody").html(message + ":" + errInfos);
+                $("#msgbox").modal();
             }
         });
     }
@@ -116,7 +169,7 @@
         dateBegin = new wijmo.input.InputDate('#dateBegin', {
             //min: new Date(2014, 8, 1),
             format: 'yyyy-M-d',
-            value: new Date(<%=DateTime.Now.Year%>, 0, 1)
+            value: new Date(<%=DateTime.Now.Year%>, <%=DateTime.Now.Month - 1%>, 1)
         });
         dateEnd = new wijmo.input.InputDate('#dateEnd', {
             format: 'yyyy-M-d',
@@ -204,13 +257,15 @@
         //$("#paragraphText").on('keyup', function () {
         //    $("#paragraphInfo").html("共 " + $("#paragraphText").val().length + " 字符。");
         //});
-        var lockField = <%=((int)Application["userLevel"] == 0 ? "false" : "true")%>;
+        var level = <%=(int)Session["userLevel"]%>;
+        //var lockField = <%=((int)Session["userLevel"] == 0 ? "false" : "true")%>;
+        //var visibleField = <%=((int)Session["userLevel"] >= 2 ? "false" : "true")%>;
 
         dataViewer = new wijmo.grid.FlexGrid('#dataViewer', {
             showSelectedHeaders: 'All',
             itemsSource: null,
             autoGenerateColumns: false,
-            allowDelete: true,
+            allowDelete: level <= 1,
             autoClipboard: true,
             showGroups: true,
             //autoSizeMode:true,
@@ -218,24 +273,27 @@
             //allowAddNew: true,
             columns: [
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
-                { header: 'ID', binding: 'id', width: 80 },
+                { header: '#ID', binding: 'id', width: 80, isReadOnly: true },
                 { header: '类型', binding: 'type', width: 100 },
-                { header: '登报日期', binding: 'publishTime', dataType: "Date", isReadOnly: lockField},
-                { header: '报刊类型', binding: 'magazine', isReadOnly: lockField},
-                { header: '业务员', binding: 'employee', width: 100, isReadOnly: lockField, visible: !lockField},
-                { header: '被告', binding: 'accused', isReadOnly: lockField },
-                { header: '原告', binding: 'accuser', isReadOnly: lockField },
-                { header: '法院', binding: 'court', isReadOnly: lockField },
-                { header: '法庭', binding: 'courtRoom', isReadOnly: lockField },
-                { header: '案件类型', binding: 'title', isReadOnly: lockField },
-                { header: '法官', binding: 'judge' },
-                { header: '电话', binding: 'telephone' },
-                { header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c' },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c' },
-                { header: '到账日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true },
-                { header: '来款途径', binding: 'arrivalFrom' },
+                { header: '登报日期', binding: 'publishTime', dataType: "Date", isReadOnly: level != 0},
+                { header: '被告', binding: 'accused', isReadOnly: level != 0 },
+                { header: '原告', binding: 'accuser', isReadOnly: level != 0 },
+                { header: '法院', binding: 'court', isReadOnly: level != 0 },
+                { header: '法庭', binding: 'courtRoom', isReadOnly: level != 0 },
+                { header: '法官', binding: 'judge', visible: level <= 1 },
+                { header: '电话', binding: 'telephone', visible: level <= 1 },
+                { header: '发票号', binding: 'invoiceNumber', visible: level <= 1 },
+                { header: '报刊类型', binding: 'magazine', isReadOnly: level != 0},
+                { header: '版面', binding: 'magazinePage'},
+                { header: '业务员', binding: 'employee', width: 100, isReadOnly: level != 0, visible: level == 0},
+                //{ header: '案件类型', binding: 'title', isReadOnly: lockField },
+                //{ header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '来款日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true, visible: level <= 1 },
+                { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
+                { header: '法院地址', binding: 'courtAddress'},
                 { header: '备注', binding: 'remark'}
             ],
             cellEditEnded: function (e) {
@@ -275,7 +333,7 @@
         });
 
         dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
-        dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
+        //dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
         dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
         dataViewer.__grphdrExtInfo = function (fld, val, fldDisp, valDisp, rs) {
@@ -284,6 +342,7 @@
                 totalArrival = 0.0,
                 totalUnarrival = 0.0,
                 n = 0;
+
             //for (i = 0; i < rs.length; i++) {
             var fullRs = dataViewer.itemsSource.sourceCollection;
 
@@ -296,7 +355,10 @@
                 else totalUnarrival += 1;
                 n += 1;
             }
-            return "<span>" + fldDisp + ":" + valDisp + " (" + n + " 项目, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
+            if (level >= 2)
+                return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目)";
+
+            return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
                 + "，实收： " + wijmo.Globalize.formatNumber(totalArrival, 'c') 
                 + "，未到帐： " + totalUnarrival + " 笔)"
                 + "</span>";
@@ -312,39 +374,6 @@
             updateNaviagteButtons();
         });
 
-        var     btnFirstPage = document.getElementById('btnMoveToFirstPage'),
-    btnPreviousPage = document.getElementById('btnMoveToPreviousPage'),
-    btnNextPage = document.getElementById('btnMoveToNextPage'),
-    btnLastPage = document.getElementById('btnMoveToLastPage'),
-    btnCurrentPage = document.getElementById('btnCurrentPage');
-        function updateNaviagteButtons() {
-            var cv = dataViewer.itemsSource;
-            if (cv.pageSize <= 0) {
-                //document.getElementById('naviagtionPage').style.display = 'none';
-                return;
-            }
-
-            //document.getElementById('naviagtionPage').style.display = 'block';
-
-            if (cv.pageIndex === 0) {
-                btnFirstPage.setAttribute('disabled', 'disabled');
-                btnPreviousPage.setAttribute('disabled', 'disabled');
-                btnNextPage.removeAttribute('disabled');
-                btnLastPage.removeAttribute('disabled');
-            } else if (cv.pageIndex === (cv.pageCount - 1)) {
-                btnFirstPage.removeAttribute('disabled');
-                btnPreviousPage.removeAttribute('disabled');
-                btnLastPage.setAttribute('disabled', 'disabled');
-                btnNextPage.setAttribute('disabled', 'disabled');
-            } else {
-                btnFirstPage.removeAttribute('disabled');
-                btnPreviousPage.removeAttribute('disabled');
-                btnNextPage.removeAttribute('disabled');
-                btnLastPage.removeAttribute('disabled');
-            }
-
-            btnCurrentPage.innerHTML = (cv.pageIndex + 1) + ' / ' + cv.pageCount;
-        }
 
         // commands: moving page.
         btnFirstPage.addEventListener('click', function () {
@@ -371,6 +400,7 @@
             updateNaviagteButtons();
         });
         
+        $("#saveBizdata").attr("disabled", level >= 2);
         //updateNaviagteButtons();
     });
 </script>
