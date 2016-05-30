@@ -63,7 +63,7 @@
 
                     cv.currentChanged.addHandler(function (sender, args) {
                         if (cv.currentItem != null)
-                            $("#bottomTip").html(cv.currentItem.regions);
+                            $("#bottomTip").html("");
                         refreshModifyInfo(cv)
                     });
 

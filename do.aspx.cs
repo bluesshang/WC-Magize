@@ -149,7 +149,7 @@ public partial class DataSave : System.Web.UI.Page
         int n = 0;
         StringBuilder sb = new StringBuilder(10 * 1024 * 1024);
 
-        foreach (DataRow row in dt.Rows)  
+        foreach (DataRow row in dt.Rows)
         {
             n += 1;
             sb.AppendFormat("\n{{\"id\":\"{0}\",\"accused\":\"{1}\",\"accuser\":\"{2}\",\"type\":\"{3}\",\"court\":\"{4}\",\"courtRoom\":\"{5}\",\"telephone\":\"{6}\",\"judge\":\"{7}\"",
@@ -166,6 +166,15 @@ public partial class DataSave : System.Web.UI.Page
             sb.AppendFormat(",\"invoiceNumber\":\"{0}\",\"magazinePage\":\"{1}\",\"courtAddress\":\"{2}\",\"para\":{{\"text\":\"{3}\"}}",
                 row["invoiceNumber"], row["magazinePage"], row["courtAddress"], row["originalText"]);
             sb.AppendFormat("}},");
+
+            //if (row["court"] != null)
+            //{
+            //    string ss = sb.ToString();
+            //    if (ss.IndexOf('\t') != -1)
+            //    {
+            //        int a = 99;
+            //    }
+            //}
             //json += ("\n{"
             //    + "  \"id\":\"" + row["id"] + "\""
             //    + ", \"accused\":\"" + row["accused"] + "\""
@@ -199,6 +208,14 @@ public partial class DataSave : System.Web.UI.Page
         json = json.TrimEnd(trimChars);
         db.close();
         json += "]}";
+
+        //{
+        //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Append);
+        //    StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+        //    sw.Write(json);
+        //    sw.Close();
+        //    fs.Close();
+        //}
 
         Response.Write(json);
         //for (int i = 0; i < dri.Count; i++)
@@ -717,7 +734,75 @@ public partial class DataSave : System.Web.UI.Page
             case "updateRegion":
                 UpdateRegions();
                 return;
+            case "export":
+                ExportData();
+                return;
         }
     }
 
+    private void ExportData()
+    {
+        dbutil db = new dbutil();
+
+        string sql = "select * " +
+            " from bizdata" +
+            " where publishTime between #" + Request["dateBegin"] + "# and #" + Request["dateEnd"] + " 23:59:59#";
+
+        if (userLevel == 1)
+            sql += " and employee = " + employeeId + "";
+
+        sql += " order by publishTime desc";
+
+        DataTable dt = db.query(sql);
+
+            //+ "  \"employees\": [" + db.getEmployeeId2NameMapping() + "],\n"
+            //+ "  \"records\": [\n";
+
+        //for (int row = 0; row < dt.Rows.Count; row++)
+        //int n = 0;
+        StringBuilder sb = new StringBuilder(10 * 1024 * 1024);
+        string file = "export/data_export_" + Session["userName"] + ".xls";
+        FileStream fs = new FileStream(Server.MapPath(file), FileMode.Create);
+        StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+
+        sb.Append("<table border=1>");
+        sb.AppendFormat("<tr style='background-color:gray'><td>登报日期</td><td>被告</td><td>原告</td><td>法院</td><td>法庭</td><td>法官</td><td>联系电话</td><td>法院地址</td><td>版面</td></tr>");
+        foreach (DataRow row in dt.Rows)
+        {
+            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td></tr>",
+                DateTime.Parse(row["publishTime"].ToString()).ToString("yyyy-MM-dd"), 
+                row["accused"], row["accuser"], row["court"],
+                row["courtRoom"], row["judge"], row["telephone"], row["courtAddress"], row["magazinePage"]);
+        }
+        sb.Append("</table>");
+        sw.Write(sb.ToString());
+        fs.Flush();
+
+        string json = "{\n"
+            + "  \"type\": \"data\","
+            + "  \"status\":0,"
+            + "  \"count\": \"" + dt.Rows.Count + "\","
+            + "  \"file\":\"" + file + "\","
+            + "  \"size\":\"" + fs.Length + "\"}";
+
+        sw.Close();
+        fs.Close();
+        db.close();
+        //json += sb;
+        //char[] trimChars = { ',' };
+        //json = json.TrimEnd(trimChars);
+        //db.close();
+        //json += "]}";
+
+        //{
+        //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Append);
+        //    StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+        //    sw.Write(json);
+        //    sw.Close();
+        //    fs.Close();
+        //}
+
+
+        Response.Write(json);
+    } 
 }

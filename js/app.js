@@ -23,6 +23,7 @@ var bizTypes = [
     { id: 18, name: '拍卖' },
     { id: 19, name: '撤销' },
     { id: 20, name: '申请' },
+    { id: 21, name: '清算' },
     { id: 100, name: '其他' },
 ];
 

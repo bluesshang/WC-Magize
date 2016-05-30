@@ -10,7 +10,7 @@
 %>
 
 <div class="container">
-    <h2><span class="glyphicon glyphicon-edit"></span> 浏览、修改已录入的业务数据</h2>
+    <h2><span class="glyphicon glyphicon-edit"></span> 业务数据处理</h2>
     <span style="font-size:16px">选定需要查看的登报日期范围：从</span>
     <div id="dateBegin"></div>
     <span>到</span>
@@ -41,10 +41,10 @@
 <div class="container">
     <p></p>
     <div style="padding-bottom:10px">
-        <table>
+        <table border="0" style="width:100%">
             <tr><td>
-                <input id="pagingInput" type="text" class="form-control col-md-1" placeholder="0 or empty is for no paging." value="10" />
-                </td><td>&nbsp;</td><td>
+                <input id="pagingInput" type="text" class="form-control col-md-1" style="width:80px" placeholder="0 or empty is for no paging." value="10" />
+                &nbsp;
                 <button type="button" class="btn btn-default" id="btnMoveToFirstPage">
                   <span class="glyphicon glyphicon-fast-backward"></span>
                 </button>
@@ -59,6 +59,8 @@
                 <button type="button" class="btn btn-default" id="btnMoveToLastPage">
                   <span class="glyphicon glyphicon-fast-forward"></span>
                 </button>
+                </td><td style="text-align:right">
+                <span id="recordsInfo"></span>
                 </td></tr>
             </table>
         </div>
@@ -72,11 +74,13 @@
 </div>
 
 <script>
+    var level = <%=(int)Session["userLevel"]%>;
 
     var foldLevel = 1, dateBegin = null, dateEnd = null;
 
     function refreshModifyInfo(cv)
     {
+        cv.commitEdit();
         if (cv.itemsEdited.length > 0 || cv.itemsRemoved.length > 0) {
             $("#modifyInfos").html("<div class='alert alert-warning'><span class='glyphicon glyphicon-info-sign'></span> 修改记录：修改 " + cv.itemsEdited.length + " 条，删除 " + cv.itemsRemoved.length + " 条。</div>");
             $("#saveBizdata").attr("disabled", false);
@@ -116,6 +120,8 @@
         }
 
         btnCurrentPage.innerHTML = (cv.pageIndex + 1) + ' / ' + cv.pageCount;
+
+        $("#recordsInfo").html(" 共 <b>" + cv.sourceCollection.length + "</b> 条记录，每页显示 <b>" + cv.pageSize + "</b> 条。");
     }
 
     function queryNow()
@@ -257,7 +263,6 @@
         //$("#paragraphText").on('keyup', function () {
         //    $("#paragraphInfo").html("共 " + $("#paragraphText").val().length + " 字符。");
         //});
-        var level = <%=(int)Session["userLevel"]%>;
         //var lockField = <%=((int)Session["userLevel"] == 0 ? "false" : "true")%>;
         //var visibleField = <%=((int)Session["userLevel"] >= 2 ? "false" : "true")%>;
 
@@ -265,12 +270,13 @@
             showSelectedHeaders: 'All',
             itemsSource: null,
             autoGenerateColumns: false,
-            allowDelete: level <= 1,
+            allowDelete: level == 0,
             autoClipboard: true,
             showGroups: true,
             //autoSizeMode:true,
             //sortRowIndex:true,
             //allowAddNew: true,
+            isReadOnly: level >= 2,
             columns: [
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
                 { header: '#ID', binding: 'id', width: 80, isReadOnly: true },
@@ -297,7 +303,13 @@
                 { header: '备注', binding: 'remark'}
             ],
             cellEditEnded: function (e) {
+                //dataViewer.finishEditing();
+                //dataViewer.refresh(true);
+                //dataViewer.itemsSource.commitEdit();
                 //alert(dataViewer.itemsSource.itemsEdited.length);
+                refreshModifyInfo(dataViewer.itemsSource);
+            },
+            deletedRow: function (e) {
                 refreshModifyInfo(dataViewer.itemsSource);
             }
             //new wijmo.odata.ODataCollectionView(
@@ -365,6 +377,9 @@
         }
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);
+        //dataViewerFilter.filterApplied = function(e) {
+        //    updateNaviagteButtons();
+        //}
 
         queryNow();
 
@@ -400,7 +415,9 @@
             updateNaviagteButtons();
         });
         
-        $("#saveBizdata").attr("disabled", level >= 2);
+        //$("#saveBizdata").attr("disabled", level >= 2);
         //updateNaviagteButtons();
+        if (level >= 2)
+            $("#saveBizdata").hide();
     });
 </script>

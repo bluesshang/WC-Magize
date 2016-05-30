@@ -77,10 +77,11 @@ public class dbutil
 
         for (int i = 0; i < dt.Rows.Count; i++)
         {
-            json += "{\"id\":\"" + dt.Rows[i]["id"] + "\", \"name\":\"" + dt.Rows[i]["name"] + "\"}";
-            if (i != dt.Rows.Count - 1)
-                json += ",";
+            json += "{\"id\":\"" + dt.Rows[i]["id"] + "\", \"name\":\"" + dt.Rows[i]["name"] + "\"},";
+            //if (i != dt.Rows.Count - 1)
+            //    json += ",";
         }
+        json += "{\"id\":\"0\", \"name\":\"-\"}";
 
         return json;
     }

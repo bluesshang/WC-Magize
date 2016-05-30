@@ -128,7 +128,7 @@
                             <div class="panel-heading">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-copy"></span>
-                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">业务数据录入</a>
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">业务数据处理</a>
                                 </h4>
                             </div>
                             <div id="collapse1" class="panel-collapse collapse in">
@@ -141,6 +141,10 @@
                                     <a href="#" class="list-group-item" id="singleInput">
                                         <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-list-alt"></span> 单条录入</h4>
                                         <p class="list-group-item-text">一次录入一条记录（暂未实现）</p>
+                                    </a>
+                                    <a href="#" class="list-group-item" id="dataExport">
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-download-alt"></span> 数据导出</h4>
+                                        <p class="list-group-item-text">将数据导出至 Excel 文件中。</p>
                                     </a>
                                     <a href="#" class="list-group-item" id="dataView">
                                         <span class="badge btn-danger" title="未到帐业务" id="unarrival"></span>
@@ -341,6 +345,10 @@
                 $("#mainClientArea").load("dataview.aspx");
             });
 
+            $("#dataExport").click(function () {
+                $("#mainClientArea").load("dataexport.aspx");
+            });
+
             $("#userMgr").click(function () {
                 $("#mainClientArea").load("usermgr.aspx");
             });
@@ -354,11 +362,16 @@
             });
 
             $(document).on('mousedown', function (e) {
-                if (dataViewer == null || dataViewer.itemsSource == null || dataViewer.itemsSource.items.length < 2
+                if (dataViewer == null || dataViewer.itemsSource == null// || dataViewer.itemsSource.items.length < 2
                     || e.toElement.id == "bottomTipCtrl"
                     || e.toElement.id == "bottomTip")
                     return;
 
+                if ($("#bottomTip").text() == "") {
+                    $("#bottomTipCtrl").hide();
+                    return;
+                }
+                //alert($("#bottomTip").text);
                 var t = $("#dataViewer").offset().top;
                 var l = $("#dataViewer").offset().left;
                 //var box = $("dataViewer").getBoundingClientRect();
@@ -502,10 +515,12 @@
             if (level > 2) {
                 $("#batchInput").hide();
                 $("#singleInput").hide();
-                $("#mainClientArea").load("dataview.aspx");
-            } else {
-                $("#mainClientArea").load("datainput.aspx");
+                $("#dataExport").hide();
             }
+            if (level == 2)
+                $("#mainClientArea").load("datainput.aspx");
+            else $("#mainClientArea").load("dataview.aspx");
+
             if (level != 0)
                 $("#sysMgr").hide();
         });
