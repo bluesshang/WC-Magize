@@ -154,7 +154,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default">
+
+                        <div class="panel panel-default" id="bizStat">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-align-left"></span>
@@ -162,11 +163,15 @@
                                 </h4>
                             </div>
                             <div id="collapse2" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                    TODO
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item " id="dataStatistics">
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-usd"></span> 业务量统计</h4>
+                                        <p class="list-group-item-text">统计当前系统中记录的历史业务信息。</p>
+                                    </a>
                                 </div>
                             </div>
                         </div>
+
                         <div class="panel panel-default" id="sysMgr">
                             <div class="panel-heading">
                                 <h4 class="panel-title">
@@ -175,18 +180,15 @@
                                 </h4>
                             </div>
                             <div id="collapse3" class="panel-collapse collapse">
-                                <div class="panel-body">对系统的运行参数进行调整和用户进行管理.</div>
-                                <div class="panel-collapse collapse in">
-                                    <div class="list-group">
-                                        <a href="#" class="list-group-item " id="userMgr">
-                                            <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-user"></span> 用户管理</h4>
-                                            <p class="list-group-item-text">增加、修改用户信息。</p>
-                                        </a>
-                                        <a href="#" class="list-group-item" id="regionMgr">
-                                            <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-globe"></span> 用户业务区域管理</h4>
-                                            <p class="list-group-item-text">设置业务员的业务区域范围</p>
-                                        </a>
-                                    </div>
+                                <div class="list-group">
+                                    <a href="#" class="list-group-item " id="userMgr">
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-user"></span> 用户管理</h4>
+                                        <p class="list-group-item-text">增加、修改用户信息。</p>
+                                    </a>
+                                    <a href="#" class="list-group-item" id="regionMgr">
+                                        <h4 class="list-group-item-heading"><span class="glyphicon glyphicon-globe"></span> 用户业务区域管理</h4>
+                                        <p class="list-group-item-text">设置业务员的业务区域范围</p>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -347,6 +349,10 @@
 
             $("#dataExport").click(function () {
                 $("#mainClientArea").load("dataexport.aspx");
+            });
+
+            $("#dataStatistics").click(function () {
+                $("#mainClientArea").load("datastatistics.aspx");
             });
 
             $("#userMgr").click(function () {
@@ -523,6 +529,8 @@
 
             if (level != 0)
                 $("#sysMgr").hide();
+            if (level >= 2)
+                $("#bizStat").hide();
         });
     </script>
 </body>

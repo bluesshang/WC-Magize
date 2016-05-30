@@ -676,6 +676,56 @@ public partial class DataSave : System.Web.UI.Page
         db.close();
     }
 
+    private void DataStatistics()
+    {
+        dbutil db = new dbutil();
+        string sql = "SELECT employee, orders, receivable, arrival, [year], [month] "
+            + " FROM (SELECT employee, COUNT(*) AS orders, SUM(receivable) AS receivable, SUM(arrival) AS arrival, "
+            + "     datepart('yyyy', publishTime) AS [year], datepart('m', publishTime) AS [month]"
+            + "     FROM bizdata"
+            + "     GROUP BY employee, datepart('yyyy', publishTime), datepart('m', publishTime)) A";
+        if (userLevel != 0)
+            sql += " WHERE employee = " + employeeId + "";
+        sql += " ORDER BY [year] DESC, [month] DESC";
+        DataTable dt = db.query(sql);
+
+        //string json = "{\n"
+        //    + "  \"type\": \"data\","
+        //    + "  \"status\":0,"
+        //    + "  \"count\": \"" + dt.Rows.Count + "\","
+        //    + "  \"employees\": [" + db.getEmployeeId2NameMapping() + "],\n"
+        //    + "  \"records\": [\n";
+
+        //for (int row = 0; row < dt.Rows.Count; row++)
+        StringBuilder sb = new StringBuilder(1 * 1024 * 1024);
+        sb.Append("{\n"
+            + "  \"type\": \"data\","
+            + "  \"status\":0,"
+            + "  \"count\": \"" + dt.Rows.Count + "\","
+            + "  \"employees\": [" + db.getEmployeeId2NameMapping() + "],\n"
+            + "  \"records\": [\n");
+
+        foreach (DataRow row in dt.Rows)
+        {
+            sb.AppendFormat("\n{{\"employee\":\"{0}\",\"orders\":\"{1}\",\"receivable\":\"{2}\",\"arrival\":\"{3}\",\"year\":\"{4}\",\"month\":\"{5}\",\"ym\":\"{6}年{7}月\"}},",
+                row["employee"], row["orders"], row["receivable"], row["arrival"], row["year"], row["month"], row["year"], row["month"]);
+        }
+        string json = sb.ToString();
+        char[] trimChars = { ',' };
+        json = json.TrimEnd(trimChars);
+        db.close();
+        json += "]}";
+
+        //{
+        //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Append);
+        //    StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+        //    sw.Write(json);
+        //    sw.Close();
+        //    fs.Close();
+        //}
+
+        Response.Write(json);
+    }
     private void UserLogout()
     {
         Session["userId"] = null;
@@ -736,6 +786,9 @@ public partial class DataSave : System.Web.UI.Page
                 return;
             case "export":
                 ExportData();
+                return;
+            case "statistics":
+                DataStatistics();
                 return;
         }
     }

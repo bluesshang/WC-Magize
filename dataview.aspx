@@ -276,25 +276,25 @@
             //autoSizeMode:true,
             //sortRowIndex:true,
             //allowAddNew: true,
-            isReadOnly: level >= 2,
+            isReadOnly: level > 2,
             columns: [
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
                 { header: '#ID', binding: 'id', width: 80, isReadOnly: true },
-                { header: '类型', binding: 'type', width: 100 },
-                { header: '登报日期', binding: 'publishTime', dataType: "Date", isReadOnly: level != 0},
-                { header: '被告', binding: 'accused', isReadOnly: level != 0 },
-                { header: '原告', binding: 'accuser', isReadOnly: level != 0 },
-                { header: '法院', binding: 'court', isReadOnly: level != 0 },
-                { header: '法庭', binding: 'courtRoom', isReadOnly: level != 0 },
-                { header: '法官', binding: 'judge', visible: level <= 1 },
-                { header: '电话', binding: 'telephone', visible: level <= 1 },
-                { header: '发票号', binding: 'invoiceNumber', visible: level <= 1 },
-                { header: '报刊类型', binding: 'magazine', isReadOnly: level != 0},
+                { header: '登报日期', binding: 'publishTime', width:100, dataType: "Date", isReadOnly: level != 0 && level != 2},
+                { header: '报刊类型', binding: 'magazine', width:120, isReadOnly: level != 0 && level != 2},
+                { header: '被告', binding: 'accused', isReadOnly: level != 0 && level != 2 },
+                { header: '原告', binding: 'accuser', isReadOnly: level != 0 && level != 2 },
+                { header: '法院', binding: 'court', width:250, isReadOnly: level != 0 && level != 2 },
+                { header: '法庭', binding: 'courtRoom',  isReadOnly: level > 2 },
+                { header: '法官', binding: 'judge', visible: level <= 1 || level == 2 },
+                { header: '电话', binding: 'telephone', visible: level <= 1 || level == 2 },
+                { header: '发票号', binding: 'invoiceNumber', visible: level <= 1 || level == 2 },
                 { header: '版面', binding: 'magazinePage'},
-                { header: '业务员', binding: 'employee', width: 100, isReadOnly: level != 0, visible: level == 0},
+                { header: '类型', binding: 'type', width: 100, isReadOnly: level != 0 && level != 2 },
+                { header: '业务员', binding: 'employee', width: 100, isReadOnly: level != 0 && level != 2, visible: level == 0 || level == 2},
                 //{ header: '案件类型', binding: 'title', isReadOnly: lockField },
                 //{ header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 2 },
                 { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
                 { header: '来款日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true, visible: level <= 1 },
                 { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
@@ -370,7 +370,7 @@
             if (level >= 2)
                 return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目)";
 
-            return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
+            return "<span>" + valDisp + " (" + n + " 条记录, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
                 + "，实收： " + wijmo.Globalize.formatNumber(totalArrival, 'c') 
                 + "，未到帐： " + totalUnarrival + " 笔)"
                 + "</span>";
