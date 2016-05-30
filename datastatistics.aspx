@@ -53,7 +53,16 @@
                     //$("#msgboxTitle").html("<span class=\"glyphicon glyphicon-ok\"/> 业务数据保存成功");
                     //$("#msgboxBody").html("总共成功保存 " + data.successNum + " 条业务数据。[message: " + data.message + "]");
                     //$("#msgbox").modal();
+                    //var records = [];
+                    //for (i = 0; i < data.records.length; i++) {
+                    //    data.records[i].orders = eval(data.records[i].orders);
+                    //    data.records[i].arrival = eval(data.records[i].arrival);
+                    //    data.records[i].receivable = eval(data.records[i].receivable);
+                    //}
+                    evalDataStatistics(data.records);
+
                     var cv = new wijmo.collections.CollectionView(data.records);
+                    //var cv = new wijmo.collections.CollectionView(records);
                     //cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
 
@@ -180,8 +189,8 @@
             //var fullRs = dataViewer.itemsSource.sourceCollection;
 
             for (i = 0; i < rs.length; i++) {
-                totalReceivable += (rs[i].receivable == "" ? 0 : eval(rs[i].receivable));
-                if (rs[i].arrival != "")
+                totalReceivable += (rs[i].receivable == null ? 0 : eval(rs[i].receivable));
+                if (rs[i].arrival != null)
                     totalArrival += eval(rs[i].arrival);
                 else totalUnarrival += 1;
                 n += 1;

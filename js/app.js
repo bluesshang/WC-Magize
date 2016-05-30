@@ -51,3 +51,23 @@ var userLevels = [
     { id: 2, name: "数据导入员" },
     { id: 3, name: "普通浏览者" },
 ];
+
+function evalDataStatistics(rs)
+{
+    for (i = 0; i < rs.length; i++) {
+        rs[i].orders = eval(rs[i].orders);
+        rs[i].arrival = eval(rs[i].arrival);
+        rs[i].receivable = eval(rs[i].receivable);
+    }
+}
+
+function evalDataQuery(rs) {
+    for (i = 0; i < rs.length; i++) {
+        rs[i].publishTime = new Date(rs[i].publishTime);
+        //if (rs[i].arrivalTime != "")
+        //    rs[i].arrivalTime = new Date(rs[i].arrivalTime);
+        //rs[i].id = eval(rs[i].id);
+        rs[i].arrival = eval(rs[i].arrival);
+        rs[i].receivable = eval(rs[i].receivable);
+    }
+}

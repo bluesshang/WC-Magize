@@ -22,6 +22,7 @@
 <script>
 
     function refreshModifyInfo(cv) {
+        cv.commitEdit();
         if (cv.itemsEdited.length > 0 || cv.itemsRemoved.length > 0 || cv.itemsAdded.length > 0) {
             $("#modifyInfos").html("<div class='alert alert-warning'><span class='glyphicon glyphicon-info-sign'></span> 修改记录：修改 " + cv.itemsEdited.length + " 条，删除 " + cv.itemsRemoved.length + " 条，新增 " + cv.itemsAdded.length + " 条。</div>");
             $("#saveBizdata").attr("disabled", false);
@@ -172,6 +173,9 @@
             ],
             cellEditEnded: function (e) {
                 //alert(dataViewer.itemsSource.itemsEdited.length);
+                refreshModifyInfo(dataViewer.itemsSource);
+            },
+            deletedRow: function (e) {
                 refreshModifyInfo(dataViewer.itemsSource);
             }
             //new wijmo.odata.ODataCollectionView(

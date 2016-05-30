@@ -142,6 +142,7 @@
                     //$("#msgboxTitle").html("<span class=\"glyphicon glyphicon-ok\"/> 业务数据保存成功");
                     //$("#msgboxBody").html("总共成功保存 " + data.successNum + " 条业务数据。[message: " + data.message + "]");
                     //$("#msgbox").modal();
+                    evalDataQuery(data.records);
                     var cv = new wijmo.collections.CollectionView(data.records);
                     cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
@@ -361,8 +362,8 @@
             for (i = 0; i < fullRs.length; i++) {
                 if (fullRs[i].employee != eval(val))
                     continue;
-                totalReceivable += (fullRs[i].receivable == "" ? 0 : eval(fullRs[i].receivable));
-                if (fullRs[i].arrival != "")
+                totalReceivable += (fullRs[i].receivable == null ? 0 : eval(fullRs[i].receivable));
+                if (fullRs[i].arrival != null)
                     totalArrival += eval(fullRs[i].arrival);
                 else totalUnarrival += 1;
                 n += 1;

@@ -42,7 +42,7 @@
     </nav>
 
 
-    <div class="container" id="mainBox">
+    <div class="container" style="width:50%" id="mainBox">
         <h2>欢迎使用文萃报刊信息登记系统</h2>
         <!-- Trigger the modal with a button -->
         <!--p><span class="glyphicon glyphicon-log-in"></span>请登录 ...</!--p-->

@@ -321,7 +321,7 @@
                 { header: '法官', binding: 'judge' },
                 { header: '案件类型', binding: 'title'},
                 { header: '电话', binding: 'telephone' },
-                { header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
+                //{ header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
                 { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', minWidth:20, maxWidth:40 },
                 { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
                 { header: '来款途径', binding: 'arrivalFrom' },
