@@ -8,6 +8,7 @@
     {
         Response.Redirect("index.aspx", true);
     }
+    //Response.Write(EmployeeInfo.foooo());
 %>
 
 <!DOCTYPE html>
@@ -119,7 +120,7 @@
 
     <table border="0" style="width:100%">
         <tr>
-            <td style="width: 20%; min-width: 200px; max-width: 300px; margin-left: 5px; vertical-align: top;">
+            <td style="width: 20%; min-width: 200px; max-width: 300px; margin-left: 5px; vertical-align: top;" id="tabCtrlPanel">
                 <div style="padding-right: 15px; padding-left: 15px; margin-right: auto; margin-left: auto;">
                     <!--h2>Accordion Example</!--h2>
                     <p><strong>Note:</strong> The <strong>data-parent</strong> attribute makes sure that all collapsible elements under the specified parent will be closed when one of the collapsible item is shown.</p-->

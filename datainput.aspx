@@ -56,10 +56,30 @@
     <button type="button" id="submitBizdata" class="btn btn-success btn-lg">
         <span class="glyphicon glyphicon-floppy-saved"></span> 提交系统保存
     </button>
+    <button type="button" id="saveLayout" class="btn btn-lg">
+        <span class="glyphicon glyphicon-star"></span> 保存表格布局
+    </button>
 </div>
 
 <script>
     $(document).ready(function () {
+
+        $("#saveLayout").click(function () {
+            $.ajax({
+                type: 'post',
+                url: 'do.aspx',
+                data: "op=saveLayout&field=layoutB&columns=" + dataViewer.columnLayout,
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    $("#saveLayout").hide();
+                },
+                error: function (o, message) {
+                    alert(message);
+                }
+            });
+        });
+
         $("#submitParagraph").click(function () {
             //alert("xx");
             //var count = 100;
@@ -305,39 +325,55 @@
             autoGenerateColumns: false,
             //autoSizeMode:true,
             //sortRowIndex:true,
-            allowDelete: true,
-            //allowAddNew: true,
+            //allowDelete: true,
+            allowAddNew: true,
             columns: [
                 { header: '-', binding: 'valid', width: 30, format: 'b', dataType: "Boolean" },
                 { header: '#ID', binding: 'id', width: 100 },
                 { header: '登报日期', binding: 'publishTime', dataType: "Date", width: 100 },
                 { header: '报刊类型', binding: 'magazine' },
-                { header: '业务员', binding: 'employee' },
+                { header: '业务员', binding: 'employee', width:100 },
                 { header: '类型', binding: 'type', width:100 },
                 { header: '被告', binding: 'accused'},
                 { header: '原告', binding: 'accuser'},
-                { header: '法院', binding: 'court'},
+                { header: '法院', binding: 'court', width:300},
                 { header: '法庭', binding: 'courtRoom' },
-                { header: '法官', binding: 'judge' },
-                { header: '案件类型', binding: 'title'},
+                { header: '法官', binding: 'judge', width:100 },
+                //{ header: '案件类型', binding: 'title'},
                 { header: '电话', binding: 'telephone' },
                 //{ header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', minWidth:20, maxWidth:40 },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', minWidth: 20, maxWidth: 40 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', width:100 },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', width: 100 },
                 { header: '来款途径', binding: 'arrivalFrom' },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
                 { header: '备注', binding: 'remark'},
                 { header: '解析结果', binding: 'message', isReadOnly: true }
-            ]
+            ],
+            resizedColumn: function (e) {
+                $("#saveLayout").show();
+            },
+            draggedColumn: function (e) {
+                $("#saveLayout").show();
+            }
             //new wijmo.odata.ODataCollectionView(
             //'http://services.odata.org/V4/Northwind/Northwind.svc/',
             //'Order_Details_Extendeds'),
         });
+
+        <%
+            string layout = dbutil.getFlexgridLayout("layoutB", (int)Session["userId"]);
+            if (layout != null)
+            {
+                Response.Write("dataViewer.columnLayout = '" + layout + "';");
+            }
+        %>
 
         dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
         //dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
         dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
         dataViewerFilter = new wijmo.grid.filter.FlexGridFilter(dataViewer);
+
+        $("#saveLayout").hide();
     });
 </script>

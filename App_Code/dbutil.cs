@@ -85,4 +85,23 @@ public class dbutil
 
         return json;
     }
+
+    static public string getFlexgridLayout(string field, int employee)
+    {
+        try
+        {
+            dbutil db = new dbutil();
+            DataTable dt = db.query("select " + field + " from employee where id=" + employee);
+            if (dt.Rows.Count == 0)
+                return null;
+
+            string layout = (string)dt.Rows[0][field];
+            db.close();
+            return layout;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
 }

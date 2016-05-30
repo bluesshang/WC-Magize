@@ -64,7 +64,7 @@
     <button type="button" id="exportBizdata" class="btn btn-success btn-lg">
         <span class="glyphicon glyphicon-download-alt"></span> 导出
     </button>
-    <div id="fileInfo" class="panel" style="padding-top:20px"></div>
+    <div id="fileInfo" class="panel" style="padding-top:20px;border:0px"></div>
 </div>
 
 <script>
@@ -126,6 +126,10 @@
                     //$("#msgboxTitle").html("<span class=\"glyphicon glyphicon-ok\"/> 业务数据保存成功");
                     //$("#msgboxBody").html("总共成功保存 " + data.successNum + " 条业务数据。[message: " + data.message + "]");
                     //$("#msgbox").modal();
+                    for (i = 0; i < data.records.length; i++) {
+                        data.records[i].publishTime = new Date(data.records[i].publishTime);
+                    }
+
                     var cv = new wijmo.collections.CollectionView(data.records);
                     //cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
@@ -229,10 +233,10 @@
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
                 //{ header: '#ID', binding: 'id', width: 80, isReadOnly: true },
                 //{ header: '类型', binding: 'type', width: 100 },
-                { header: '登报日期', binding: 'publishTime', dataType: "Date"},
+                { header: '登报日期', binding: 'publishTime', width:100, dataType: "Date"},
                 { header: '被告', binding: 'accused'},
                 { header: '原告', binding: 'accuser'},
-                { header: '法院', binding: 'court'},
+                { header: '法院', binding: 'court', width:250},
                 { header: '法庭', binding: 'courtRoom'},
                 { header: '法官', binding: 'judge'},
                 { header: '电话', binding: 'telephone'},

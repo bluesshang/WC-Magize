@@ -9,7 +9,7 @@
     }
 %>
 
-<div class="container">
+<div class="container" id="queryPanel">
     <h2><span class="glyphicon glyphicon-edit"></span> 业务数据处理</h2>
     <span style="font-size:16px">选定需要查看的登报日期范围：从</span>
     <div id="dateBegin"></div>
@@ -38,12 +38,12 @@
     </table>
 </div>
 
-<div class="container">
+<div class="container" id="dataPanel">
     <p></p>
     <div style="padding-bottom:10px">
         <table border="0" style="width:100%">
             <tr><td>
-                <input id="pagingInput" type="text" class="form-control col-md-1" style="width:80px" placeholder="0 or empty is for no paging." value="10" />
+                <input id="pagingInput" type="text" class="form-control col-md-1" style="width:80px" placeholder="0 or empty is for no paging." value="15" />
                 &nbsp;
                 <button type="button" class="btn btn-default" id="btnMoveToFirstPage">
                   <span class="glyphicon glyphicon-fast-backward"></span>
@@ -59,6 +59,13 @@
                 <button type="button" class="btn btn-default" id="btnMoveToLastPage">
                   <span class="glyphicon glyphicon-fast-forward"></span>
                 </button>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button type="button" class="btn btn-default"" id="btnMaximum">
+                  <span class="glyphicon glyphicon-fullscreen"></span>
+                </button>
+                <button type="button" class="btn btn-default"" id="btnNormalWnd">
+                  <span class="glyphicon glyphicon-unchecked"></span>
+                </button>
                 </td><td style="text-align:right">
                 <span id="recordsInfo"></span>
                 </td></tr>
@@ -70,6 +77,9 @@
     <!--/div-->
     <button type="button" id="saveBizdata" class="btn btn-success btn-lg">
         <span class="glyphicon glyphicon-floppy-saved"></span> 保存修改
+    </button>
+    <button type="button" id="saveLayout" class="btn btn-lg">
+        <span class="glyphicon glyphicon-star"></span> 保存表格布局
     </button>
 </div>
 
@@ -157,7 +167,7 @@
                         refreshModifyInfo(cv)
                     });
 
-                    cv.pageSize = 10;
+                    cv.pageSize = 15;
                     updateNaviagteButtons();
                 }
             },
@@ -196,6 +206,22 @@
 
         $("#searchNow").click(function () {
             queryNow();
+        });
+
+        $("#saveLayout").click(function () {
+            $.ajax({
+                type: 'post',
+                url: 'do.aspx',
+                data: "op=saveLayout&field=layoutA&columns=" + dataViewer.columnLayout,
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    $("#saveLayout").hide();
+                },
+                error: function (o, message) {
+                    alert(message);
+                }
+            });
         });
 
         $("#saveBizdata").click(function () {
@@ -286,6 +312,9 @@
                 { header: '被告', binding: 'accused', isReadOnly: level != 0 && level != 2 },
                 { header: '原告', binding: 'accuser', isReadOnly: level != 0 && level != 2 },
                 { header: '法院', binding: 'court', width:250, isReadOnly: level != 0 && level != 2 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 2 },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
                 { header: '法庭', binding: 'courtRoom',  isReadOnly: level > 2 },
                 { header: '法官', binding: 'judge', visible: level <= 1 || level == 2 },
                 { header: '电话', binding: 'telephone', visible: level <= 1 || level == 2 },
@@ -295,10 +324,7 @@
                 { header: '业务员', binding: 'employee', width: 100, isReadOnly: level != 0 && level != 2, visible: level == 0 || level == 2},
                 //{ header: '案件类型', binding: 'title', isReadOnly: lockField },
                 //{ header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 2 },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
                 { header: '来款日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true, visible: level <= 1 },
-                { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
                 { header: '法院地址', binding: 'courtAddress'},
                 { header: '备注', binding: 'remark'}
@@ -312,16 +338,53 @@
             },
             deletedRow: function (e) {
                 refreshModifyInfo(dataViewer.itemsSource);
+            },
+            resizedColumn: function(e) {
+                $("#saveLayout").show();
+            },
+            draggedColumn: function(e) {
+                $("#saveLayout").show();
             }
             //new wijmo.odata.ODataCollectionView(
             //'http://services.odata.org/V4/Northwind/Northwind.svc/',
             //'Order_Details_Extendeds'),
         });
 
+        <%
+            string layout = dbutil.getFlexgridLayout("layoutA", (int)Session["userId"]);
+            if (layout != null)
+            {
+                Response.Write("dataViewer.columnLayout = '" + layout + "';");
+            }
+        %>
+        //alert(JSON.stringify(dataViewer.columns));
+        //{
+        //    var cols = dataViewer.columns;
+        //    var colinfos = [];
+        //    for (i = 0; i < cols.length; i++) {
+        //        colinfos.push({
+        //            header: cols[i].header,
+        //            binding: cols[i].binding,
+        //            dataType: cols[i].dataType,
+        //            isReadOnly: cols[i].isReadOnly,
+        //            format: cols[i].format,
+        //            index: cols[i].index,
+        //            width: cols[i].width,
+        //            renderSize: cols[i].renderSize
+        //        });
+        //    }
+        //    //alert(JSON.stringify(colinfos));
+            
+
+        //    //dataViewer.columns = colinfos;
+        //    //dataViewer.setco
+        //}
+
         $("#unfoldAll").click(function () {
             foldLevel = 1;
             dataViewer.collapseGroupsToLevel(foldLevel);
         });
+
         $("#foldAll").click(function () {
             foldLevel = 0;
             dataViewer.collapseGroupsToLevel(foldLevel);
@@ -343,6 +406,23 @@
             dateBegin.text = '<%=DateTime.Now.ToString("yyyy-M-d")%>';
             dateEnd.text = '<%=DateTime.Now.ToString("yyyy-M-d")%>';
             queryNow();
+        });
+
+        $("#btnMaximum").click(function () {
+            $("#tabCtrlPanel").hide();
+            $("#queryPanel").hide();
+            $("#dataPanel").css("width", $(document.body).width() - 60);
+            $("#dataPanel").css("margin-right", "20px");
+            $("#dataPanel").css("margin-left", "20px");
+            dataViewer.invalidate();
+        });
+
+        $("#btnNormalWnd").click(function () {
+            $("#tabCtrlPanel").show();
+            $("#queryPanel").show();
+            $("#dataPanel").css("width", $("#queryPanel").width() + 30);
+            $("#dataPanel").css("margin-right", "auto");
+            $("#dataPanel").css("margin-left", "auto");
         });
 
         dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
@@ -369,7 +449,7 @@
                 n += 1;
             }
             if (level >= 2)
-                return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目)";
+                return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目)</span>";
 
             return "<span>" + valDisp + " (" + n + " 条记录, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
                 + "，实收： " + wijmo.Globalize.formatNumber(totalArrival, 'c') 
@@ -418,7 +498,9 @@
         
         //$("#saveBizdata").attr("disabled", level >= 2);
         //updateNaviagteButtons();
-        if (level >= 2)
+        if (level > 2)
             $("#saveBizdata").hide();
+
+        $("#saveLayout").hide();
     });
 </script>

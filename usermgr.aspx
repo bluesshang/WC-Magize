@@ -47,6 +47,7 @@
                     //$("#msgboxTitle").html("<span class=\"glyphicon glyphicon-ok\"/> 业务数据保存成功");
                     //$("#msgboxBody").html("总共成功保存 " + data.successNum + " 条业务数据。[message: " + data.message + "]");
                     //$("#msgbox").modal();
+                    evalDataStatistics(data.records);
                     var cv = new wijmo.collections.CollectionView(data.records);
                     cv.trackChanges = true;
                     dataViewer.itemsSource = cv;

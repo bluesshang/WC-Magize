@@ -1612,9 +1612,9 @@ pre code {
     width: 1370px;
   }
 }
-@media (min-width: 1500px) {
+@media (min-width: 1700px) {
   .container {
-    width: 1470px;
+    width: 1500px;
   }
 }
 .container-fluid {

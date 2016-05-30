@@ -710,11 +710,16 @@ public partial class DataSave : System.Web.UI.Page
             sb.AppendFormat("\n{{\"employee\":\"{0}\",\"orders\":\"{1}\",\"receivable\":\"{2}\",\"arrival\":\"{3}\",\"year\":\"{4}\",\"month\":\"{5}\",\"ym\":\"{6}年{7}月\"}},",
                 row["employee"], row["orders"], row["receivable"], row["arrival"], row["year"], row["month"], row["year"], row["month"]);
         }
-        string json = sb.ToString();
-        char[] trimChars = { ',' };
-        json = json.TrimEnd(trimChars);
+
+        sb.Remove(sb.Length - 1, 1);
+        dt = db.query("SELECT COUNT(*) AS orders, SUM(receivable) AS receivable, SUM(arrival) AS arrival FROM bizdata");
+        sb.AppendFormat("],\"summary\":{{\"orders\":\"{0}\",\"receivable\":\"{1}\",\"arrival\":\"{2}\"}}",
+            dt.Rows[0][0], dt.Rows[0][1], dt.Rows[0][2]);
+        //string json = sb.ToString();
+        //char[] trimChars = { ',' };
+        //json = json.TrimEnd(trimChars);
         db.close();
-        json += "]}";
+        sb.Append("}");
 
         //{
         //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Append);
@@ -724,7 +729,7 @@ public partial class DataSave : System.Web.UI.Page
         //    fs.Close();
         //}
 
-        Response.Write(json);
+        Response.Write(sb.ToString());
     }
     private void UserLogout()
     {
@@ -734,6 +739,13 @@ public partial class DataSave : System.Web.UI.Page
         Session["userFullName"] = null;
 
         Response.Redirect("index.aspx", true);
+    }
+    private void SaveLayout()
+    {
+        dbutil db = new dbutil();
+        db.execute("update employee set " + Request["field"] + "='" + Request["columns"] + "' where id=" + employeeId);
+        db.close();
+        Response.Write("{\"status\":\"0\"}");
     }
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -789,6 +801,9 @@ public partial class DataSave : System.Web.UI.Page
                 return;
             case "statistics":
                 DataStatistics();
+                return;
+            case "saveLayout":
+                SaveLayout();
                 return;
         }
     }
