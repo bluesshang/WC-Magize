@@ -42,7 +42,7 @@ var bizTypes = [
 var magazineNames = [
     { id: 0, name: "文萃报" },
     { id: 1, name: "法制日报" },
-    { id: 2, name: "检查日报" },
+    { id: 2, name: "检察日报" },
 ];
 
 var userLevels = [

@@ -326,7 +326,7 @@
             //autoSizeMode:true,
             //sortRowIndex:true,
             //allowDelete: true,
-            allowAddNew: true,
+            //allowAddNew: true,
             columns: [
                 { header: '-', binding: 'valid', width: 30, format: 'b', dataType: "Boolean" },
                 { header: '#ID', binding: 'id', width: 100 },
@@ -343,9 +343,11 @@
                 { header: '电话', binding: 'telephone' },
                 //{ header: '日期', binding: 'date', dataType: "Date", minWidth:50 },
                 { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', width:100 },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', width: 100 },
-                { header: '来款途径', binding: 'arrivalFrom' },
+                //{ header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', width: 100 },
+                //{ header: '来款途径', binding: 'arrivalFrom' },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
+                { header: '版面', binding: 'magazinePage' },
+                { header: '邮编', binding: 'postcode' },
                 { header: '备注', binding: 'remark'},
                 { header: '解析结果', binding: 'message', isReadOnly: true }
             ],

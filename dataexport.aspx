@@ -128,6 +128,7 @@
                     //$("#msgbox").modal();
                     for (i = 0; i < data.records.length; i++) {
                         data.records[i].publishTime = new Date(data.records[i].publishTime);
+                        data.records[i].receivable = eval(data.records[i].receivable);
                     }
 
                     var cv = new wijmo.collections.CollectionView(data.records);
@@ -241,14 +242,15 @@
                 { header: '法官', binding: 'judge'},
                 { header: '电话', binding: 'telephone'},
                 //{ header: '发票号', binding: 'invoiceNumber', visible: level <= 1 },
-                //{ header: '报刊类型', binding: 'magazine', isReadOnly: level != 0},
+                { header: '报刊类型', binding: 'magazine'},
+                { header: '邮编', binding: 'postcode'},
                 { header: '法院地址', binding: 'courtAddress'},
                 { header: '版面', binding: 'magazinePage'},
                 //{ header: '业务员', binding: 'employee', width: 100, isReadOnly: level != 0, visible: level == 0},
                 //{ header: '案件类型', binding: 'title', isReadOnly: lockField },
                 //{ header: '录入日期', binding: 'date', dataType: "Date", isReadOnly: true },
-                //{ header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 1 },
-                //{ header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c'},
+                //{ header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c'},
                 //{ header: '来款日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true, visible: level <= 1 },
                 //{ header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
@@ -298,7 +300,7 @@
 
         //dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
         ////dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");
-        //dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
+        dataViewer.columns.getColumn('magazine').dataMap = new wijmo.grid.DataMap(magazineNames, "id", "name");
 
         //dataViewer.__grphdrExtInfo = function (fld, val, fldDisp, valDisp, rs) {
         //    //return fld + " ==> " + rs.length;

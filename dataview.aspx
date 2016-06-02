@@ -66,6 +66,14 @@
                 <button type="button" class="btn btn-default"" id="btnNormalWnd">
                   <span class="glyphicon glyphicon-unchecked"></span>
                 </button>
+                <!--select id="theEditMenu" header="Edit">
+                    <option>Cut: move the current selection to the clipboard</option>
+                    <option>Copy: copy the current selection to the clipboard</option>
+                    <option>Paste: insert the clipboard content at the cursor position</option>
+                    <option></option>
+                    <option>Find: search the current document for some text</option>
+                    <option>Replace: replace occurrences of a string in the current document</option>
+                </select-->
                 </td><td style="text-align:right">
                 <span id="recordsInfo"></span>
                 </td></tr>
@@ -308,10 +316,10 @@
                 //{ header: '-', binding: 'valid', width: 30, format: 'b', dataType:"Boolean" },
                 { header: '#ID', binding: 'id', width: 80, isReadOnly: true },
                 { header: '登报日期', binding: 'publishTime', width:100, dataType: "Date", isReadOnly: level != 0 && level != 2},
-                { header: '报刊类型', binding: 'magazine', width:120, isReadOnly: level != 0 && level != 2},
-                { header: '被告', binding: 'accused', isReadOnly: level != 0 && level != 2 },
-                { header: '原告', binding: 'accuser', isReadOnly: level != 0 && level != 2 },
-                { header: '法院', binding: 'court', width:250, isReadOnly: level != 0 && level != 2 },
+                { header: '报刊类型', binding: 'magazine', width:120, isReadOnly: level > 2},
+                { header: '被告', binding: 'accused', isReadOnly: level > 2 },
+                { header: '原告', binding: 'accuser', isReadOnly: level > 2 },
+                { header: '法院', binding: 'court', width:250, isReadOnly: level > 2 },
                 { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 2 },
                 { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
                 { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
@@ -327,6 +335,7 @@
                 { header: '来款日期', binding: 'arrivalTime', dataType: "Date", isReadOnly: true, visible: level <= 1 },
                 //{ header: '状态', binding: 'status', width: '*', isReadOnly: true },
                 { header: '法院地址', binding: 'courtAddress'},
+                { header: '邮编', binding: 'postcode'},
                 { header: '备注', binding: 'remark'}
             ],
             cellEditEnded: function (e) {
@@ -496,6 +505,11 @@
             updateNaviagteButtons();
         });
         
+        //var mnEdit = new wijmo.input.Menu('#theEditMenu');
+        //mnEdit.itemClicked.addHandler(function(sender, args){
+        //    var menu = sender;
+        //    alert('Thanks for selecting option ' + menu.selectedIndex + ' from menu **' + menu.header + '**!');
+        //});
         //$("#saveBizdata").attr("disabled", level >= 2);
         //updateNaviagteButtons();
         if (level > 2)

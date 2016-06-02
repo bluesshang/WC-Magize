@@ -34,7 +34,7 @@ public enum NoticeType : int
     MISSING, // 失踪
     EXECUTE, // 执行
     APPEAL, // 上诉
-    UNKNOWN
+    UNKNOWN = 100
 }
 
 // 业务信息
@@ -71,6 +71,7 @@ public class DataRecordItem
     public string invoiceNumber;
     public string magazinePage;
     public string courtAddress;
+    public string postcode;
 
     public void Reset()
     {
@@ -92,6 +93,7 @@ public class DataRecordItem
         invoiceNumber = "";
         magazinePage = "";
         courtAddress = "";
+        postcode = "";
         type = NoticeType.UNKNOWN;
     }
     public void MakeJson()
@@ -163,7 +165,8 @@ public class DataParagrapher
                     paragraphs[paragraphs.Count - 1].text =
                         paragraphs[paragraphs.Count - 1].text + "\n" + dp.text;
                 }
-                else if (dp.text.Length > 80) paragraphs.Add(dp);
+                else paragraphs.Add(dp);
+                //else if (dp.text.Length > 40) paragraphs.Add(dp);
             }
 
             begin = end + 1;
@@ -289,7 +292,7 @@ public abstract class DataParser
 
     public static NoticeType GetNoticeType(string data)
     {
-        if (data.Length < 50)
+        if (data.Length < 20)
             throw new DataParseException(ParseError.TooShort, "信息太少，无法自动解析。");
 
         PredefinedTypes[] types = {
@@ -559,6 +562,10 @@ public class UnknownParser : DataParser
 {
     public override bool Parse(string data, ref DataRecordItem dri)
     {
+        dri.court = ExtractCourt(data);
+        dri.telephone = ExtractTelephone(data);
+        dri.type = NoticeType.UNKNOWN;
+        //return false;
         throw new DataParseException(ParseError.NotSupport, "该类业务数据当前未能识别");
     }
 }

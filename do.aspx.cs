@@ -49,7 +49,7 @@ public partial class DataSave : System.Web.UI.Page
                     DateTime dt = DateTime.Parse(dri[i].date);
                     OleDbCommand MyCmd = new OleDbCommand("insert into bizdata "
                         + "(type,bizTime,publishTime,employee,accused,accuser,court,courtRoom,judge,telephone,title,"
-                        + "receivable,arrival,arrivalTime,remark,invoiceNumber,magazinePage,courtAddress,originalText) "
+                        + "receivable,arrival,arrivalTime,remark,invoiceNumber,magazine,magazinePage,postcode,courtAddress,originalText) "
                         + "values(" + (int)dri[i].type
                             + ", '" + dt.ToString("yyyy-MM-dd hh:mm:ss") + "'"
                             + ", " + publishTime
@@ -66,7 +66,9 @@ public partial class DataSave : System.Web.UI.Page
                             + ", " + (dri[i].arrival != 88888888 ? "'" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "'" : "NULL")
                             + ", '" + dri[i].remark + "'"
                             + ", '" + dri[i].invoiceNumber + "'"
+                            + ", '" + dri[i].magazine + "'"
                             + ", '" + dri[i].magazinePage + "'"
+                            + ", '" + dri[i].postcode + "'"
                             + ", '" + dri[i].courtAddress + "'"
                             + ", '" + dri[i].para.text + "'"
                         + ")", MyConn);
@@ -131,7 +133,7 @@ public partial class DataSave : System.Web.UI.Page
         if (userLevel == 1)
             sql += " and employee = " + employeeId + "";
 
-        sql += " order by publishTime desc";
+        sql += " order by id desc";
 
         //OleDbDataAdapter Da = new OleDbDataAdapter(sql, MyConn);
         //DataTable dt = new DataTable();
@@ -163,8 +165,8 @@ public partial class DataSave : System.Web.UI.Page
                 );
             sb.AppendFormat(",\"receivable\":\"{0}\",\"arrival\":\"{1}\",\"arrivalTime\":\"{2}\",\"arrivalFrom\":\"{3}\",\"employee\":\"{4}\",\"remark\":\"{5}\",\"publishTime\":\"{6}\",\"magazine\":\"{7}\"",
                 row["receivable"], row["arrival"], row["arrivalTime"], row["arrivalFrom"], row["employee"], row["remark"], row["publishTime"], row["magazine"]);
-            sb.AppendFormat(",\"invoiceNumber\":\"{0}\",\"magazinePage\":\"{1}\",\"courtAddress\":\"{2}\",\"para\":{{\"text\":\"{3}\"}}",
-                row["invoiceNumber"], row["magazinePage"], row["courtAddress"], row["originalText"]);
+            sb.AppendFormat(",\"invoiceNumber\":\"{0}\",\"magazinePage\":\"{1}\",\"postcode\":\"{2}\",\"courtAddress\":\"{3}\",\"para\":{{\"text\":\"{4}\"}}",
+                row["invoiceNumber"], row["magazinePage"], row["postcode"], row["courtAddress"], row["originalText"]);
             sb.AppendFormat("}},");
 
             //if (row["court"] != null)
@@ -210,7 +212,7 @@ public partial class DataSave : System.Web.UI.Page
         json += "]}";
 
         //{
-        //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Append);
+        //    FileStream fs = new FileStream("D:\\json.txt", FileMode.Create);
         //    StreamWriter sw = new StreamWriter(fs, Encoding.Default);
         //    sw.Write(json);
         //    sw.Close();
@@ -300,6 +302,7 @@ public partial class DataSave : System.Web.UI.Page
                 + ", magazine='" + dri[i].magazine + "'"
                 + ", remark='" + dri[i].remark + "'"
                 + ", invoiceNumber='" + dri[i].invoiceNumber + "'"
+                + ", postcode='" + dri[i].postcode + "'"
                 + ", magazinePage='" + dri[i].magazinePage + "'"
                 + ", courtAddress='" + dri[i].courtAddress + "'"
                 + ", arrivalFrom='" + dri[i].arrivalFrom + "'"
@@ -812,14 +815,14 @@ public partial class DataSave : System.Web.UI.Page
     {
         dbutil db = new dbutil();
 
-        string sql = "select * " +
-            " from bizdata" +
-            " where publishTime between #" + Request["dateBegin"] + "# and #" + Request["dateEnd"] + " 23:59:59#";
+        string sql = "select A.*, B.name as magazineName " +
+            " from bizdata A, magazine B" +
+            " where A.magazine=B.id and A.publishTime between #" + Request["dateBegin"] + "# and #" + Request["dateEnd"] + " 23:59:59#";
 
         if (userLevel == 1)
             sql += " and employee = " + employeeId + "";
 
-        sql += " order by publishTime desc";
+        sql += " order by A.id desc";
 
         DataTable dt = db.query(sql);
 
@@ -834,18 +837,18 @@ public partial class DataSave : System.Web.UI.Page
         StreamWriter sw = new StreamWriter(fs, Encoding.Default);
 
         sb.Append("<table border=1>");
-        sb.AppendFormat("<tr style='background-color:gray'><td>登报日期</td><td>被告</td><td>原告</td><td>法院</td><td>法庭</td><td>法官</td><td>联系电话</td><td>法院地址</td><td>版面</td></tr>");
+        sb.AppendFormat("<tr style='background-color:gray'><td>登报日期</td><td>报刊类型</td><td>被告</td><td>原告</td><td>法院</td><td>法庭</td><td>法官</td><td>联系电话</td><td>邮编</td><td>法院地址</td><td>版面</td><td>应收金额</td></tr>");
         foreach (DataRow row in dt.Rows)
         {
-            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td></tr>",
-                DateTime.Parse(row["publishTime"].ToString()).ToString("yyyy-MM-dd"), 
-                row["accused"], row["accuser"], row["court"],
-                row["courtRoom"], row["judge"], row["telephone"], row["courtAddress"], row["magazinePage"]);
+            sb.AppendFormat("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td><td>{7}</td><td>{8}</td><td>{9}</td><td>{10}</td><td>{11}</td></tr>",
+                DateTime.Parse(row["publishTime"].ToString()).ToString("yyyy-MM-dd"),
+                row["magazineName"], row["accused"], row["accuser"], row["court"],
+                row["courtRoom"], row["judge"], row["telephone"], row["postcode"], row["courtAddress"], row["magazinePage"], row["receivable"]);
         }
         sb.Append("</table>");
         sw.Write(sb.ToString());
         fs.Flush();
-
+        
         string json = "{\n"
             + "  \"type\": \"data\","
             + "  \"status\":0,"
