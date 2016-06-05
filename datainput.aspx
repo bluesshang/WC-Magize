@@ -62,22 +62,42 @@
 </div>
 
 <script>
+    var session = null;
+
+    try {
+        session = JSON.parse('<%=dbutil.getSessionState((int)Session["userId"], "datainput.aspx")%>');
+    } catch (e) {
+        session = {
+            //pageSize: 15,
+            layout: null,
+            //groupField: 0
+        };
+    }
+
+    function saveSessionState() {
+        //session.groupField = lastGrpFields;
+        session.layout = dataViewer.columnLayout;
+        //session.pageSize = dataViewer.itemsSource.pageSize;
+
+        $.ajax({
+            type: 'post', url: 'do.aspx',
+            data: "op=saveSession&state=" + JSON.stringify(session) + "&page=datainput.aspx",
+            cache: false, dataType: 'json',
+            success: function (data) {
+                $("#saveLayout").hide();
+                if (data.status != 0) {
+                    alert("±£¥Ê ß∞‹£∫" + data.message);
+                }
+            },
+            error: function (o, message) {
+                alert(message);
+            }
+        });
+    }
     $(document).ready(function () {
 
         $("#saveLayout").click(function () {
-            $.ajax({
-                type: 'post',
-                url: 'do.aspx',
-                data: "op=saveLayout&field=layoutB&columns=" + dataViewer.columnLayout,
-                cache: false,
-                dataType: 'json',
-                success: function (data) {
-                    $("#saveLayout").hide();
-                },
-                error: function (o, message) {
-                    alert(message);
-                }
-            });
+            saveSessionState();
         });
 
         $("#submitParagraph").click(function () {
@@ -363,12 +383,15 @@
         });
 
         <%
-            string layout = dbutil.getFlexgridLayout("layoutB", (int)Session["userId"]);
-            if (layout != null)
-            {
-                Response.Write("dataViewer.columnLayout = '" + layout + "';");
-            }
+            //string layout = dbutil.getFlexgridLayout("layoutB", (int)Session["userId"]);
+            //if (layout != null)
+            //{
+            //    Response.Write("dataViewer.columnLayout = '" + layout + "';");
+            //}
         %>
+        if (session.layout != null) {
+            dataViewer.columnLayout = session.layout;
+        }
 
         dataViewer.columns.getColumn('type').dataMap = new wijmo.grid.DataMap(bizTypes, "id", "name");
         //dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(employees, "id", "name");

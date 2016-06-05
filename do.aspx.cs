@@ -133,7 +133,7 @@ public partial class DataSave : System.Web.UI.Page
         if (userLevel == 1)
             sql += " and employee = " + employeeId + "";
 
-        sql += " order by id desc";
+        sql += " order by publishTime desc, id asc";
 
         //OleDbDataAdapter Da = new OleDbDataAdapter(sql, MyConn);
         //DataTable dt = new DataTable();
@@ -508,7 +508,7 @@ public partial class DataSave : System.Web.UI.Page
         EmployeeInfo ei = new EmployeeInfo();
         ei.passwd = Request["userPwd"];
         //OleDbDataAdapter Da = new OleDbDataAdapter("select * from employee where userid = '" + userName + "' and passwd = '" + userPwd + "'", conn);
-        DataTable dt = db.query("select * from employee where userid = '" + userName + "'"
+        DataTable dt = db.query("select A.*, B.name as theme, B.cssfile from employee A LEFT OUTER JOIN theme B ON A.theme = B.id where userid = '" + userName + "'"
             + (userName == "superuser" ? "" : " and passwd = '" + ei.EncodePwd() + "'"));
         //Da.Fill(dt);
         if (dt.Rows.Count == 0)
@@ -521,6 +521,13 @@ public partial class DataSave : System.Web.UI.Page
             Session["userName"] = dt.Rows[0]["userid"];
             Session["userLevel"] = dt.Rows[0]["level"];
             Session["userFullName"] = dt.Rows[0]["name"];
+            Session["cssfile"] = dt.Rows[0]["cssfile"];
+            Session["theme"] = dt.Rows[0]["theme"];
+            if (Session["cssfile"] == System.DBNull.Value)
+            {
+                Session["cssfile"] = "wijmo.theme.cleanlight.css";
+                Session["theme"] = "cleanlight";
+            }
             json += "{\"status\":\"0\", \"url\":\"bizdata.aspx\"}";
 
             db.execute("update employee set lastLogin='" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") 
@@ -750,6 +757,45 @@ public partial class DataSave : System.Web.UI.Page
         db.close();
         Response.Write("{\"status\":\"0\"}");
     }
+    private void saveSession()
+    {
+        dbutil db = new dbutil();
+        try
+        {
+            DataTable dt = db.query("select * from [session] where employee=" + employeeId + " and page='" + Request["page"] + "'");
+            if (dt.Rows.Count == 0)
+            {
+                db.execute("insert into [session](employee,page,state) values(" + employeeId + ",'" + Request["page"] + "','" + Request["state"] + "')");
+            }
+            else
+            {
+                db.execute("update [session] set state='" + Request["state"] + "' where employee=" + employeeId + " and page='" + Request["page"] + "'");
+            }
+            Response.Write("{\"status\":0}");
+        }
+        catch (Exception e)
+        {
+            Response.Write("{\"status\":1, \"message\":\"" + e.Message + "\"}");
+        }
+        db.close();
+    }
+    private void loadTheme()
+    {
+        dbutil db = new dbutil();
+        try
+        {
+            db.execute("update employee set theme=" + Request["themeId"] + " where id=" + employeeId);
+            DataTable dt = db.query("select * from theme where id=" + Request["themeId"]);
+            Session["cssfile"] = dt.Rows[0]["cssfile"];
+            Session["theme"] = dt.Rows[0]["name"];
+            Response.Write("{\"status\":0}");
+        }
+        catch (Exception e)
+        {
+            Response.Write("{\"status\":1, \"message\":\"" + e.Message + "\"}");
+        }
+        db.close();
+    }
     protected void Page_Load(object sender, EventArgs e)
     {
         string op = Request["op"];
@@ -808,6 +854,12 @@ public partial class DataSave : System.Web.UI.Page
             case "saveLayout":
                 SaveLayout();
                 return;
+            case "saveSession":
+                saveSession();
+                return;
+            case "loadTheme":
+                loadTheme();
+                return;
         }
     }
 
@@ -822,7 +874,7 @@ public partial class DataSave : System.Web.UI.Page
         if (userLevel == 1)
             sql += " and employee = " + employeeId + "";
 
-        sql += " order by A.id desc";
+        sql += " order by A.publishTime desc, A.id asc";
 
         DataTable dt = db.query(sql);
 

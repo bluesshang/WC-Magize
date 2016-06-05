@@ -104,4 +104,23 @@ public class dbutil
             return null;
         }
     }
+
+    static public string getSessionState(int employee, string page)
+    {
+        try
+        {
+            dbutil db = new dbutil();
+            DataTable dt = db.query("select state from [session] where employee=" + employee + " and page='" + page + "'");
+            if (dt.Rows.Count == 0)
+                return "";
+
+            string session = (string)dt.Rows[0][0];
+            db.close();
+            return session.Replace("\\\"", "\\\\\\\"");
+        }
+        catch (Exception e)
+        {
+            return "";
+        }
+    }
 }

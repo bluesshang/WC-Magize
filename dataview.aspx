@@ -66,14 +66,19 @@
                 <button type="button" class="btn btn-default"" id="btnNormalWnd">
                   <span class="glyphicon glyphicon-unchecked"></span>
                 </button>
-                <!--select id="theEditMenu" header="Edit">
-                    <option>Cut: move the current selection to the clipboard</option>
-                    <option>Copy: copy the current selection to the clipboard</option>
-                    <option>Paste: insert the clipboard content at the cursor position</option>
+                <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <button type="button" class="btn btn-default"" id="btnRefresh">
+                  <span class="glyphicon glyphicon-refresh"></span>
+                </button>
+                <select id="groupMenu" header="<b>分组显示：</b> 业务员x">
+                    <option>业务员</option>
+                    <option>法院</option>
+                    <option>法官</option>
+                    <option>报刊类型</option>
+                    <option>登报日期</option>
                     <option></option>
-                    <option>Find: search the current document for some text</option>
-                    <option>Replace: replace occurrences of a string in the current document</option>
-                </select-->
+                    <option>不分组显示</option>
+                </select>
                 </td><td style="text-align:right">
                 <span id="recordsInfo"></span>
                 </td></tr>
@@ -87,15 +92,60 @@
         <span class="glyphicon glyphicon-floppy-saved"></span> 保存修改
     </button>
     <button type="button" id="saveLayout" class="btn btn-lg">
-        <span class="glyphicon glyphicon-star"></span> 保存表格布局
+        <span class="glyphicon glyphicon-star"></span> 保存页面布局
     </button>
 </div>
 
 <script>
+    var session = null;
+
+    try {
+        session = JSON.parse('<%=dbutil.getSessionState((int)Session["userId"], "dataview.aspx")%>');
+    } catch (e) {
+        session = {
+            pageSize: 15,
+            layout: null,
+            groupField: 0
+        };
+    }
+
+    var grpDescs = [
+        {field: "employee", disp: "业务员"},
+        {field: "court", disp: "法院"},
+        {field: "judge", disp: "法官"},
+        {field: "magazine", disp: "报刊类型"},
+        {field: "publishTime", disp: "登报日期"},
+        {field: "-", disp: ""},
+        {field: "no", disp: "不分组显示"},
+    ];        
+
     var level = <%=(int)Session["userLevel"]%>;
 
     var foldLevel = 1, dateBegin = null, dateEnd = null;
+    var lastPageIndex = 0, lastGrpFields = session.groupField;
+    var mnGroup = null;
 
+    function saveSessionState()
+    {
+        session.groupField = lastGrpFields;
+        session.layout = dataViewer.columnLayout;
+        session.pageSize = dataViewer.itemsSource.pageSize;
+
+        $.ajax({
+            type: 'post', url: 'do.aspx',
+            data: "op=saveSession&state=" + JSON.stringify(session) + "&page=dataview.aspx",
+            cache: false, dataType: 'json',
+            success: function (data) {
+                $("#saveLayout").hide();
+                if (data.status != 0) {
+                    alert("保存失败：" + data.message);
+                }
+            },
+            error: function (o, message) {
+                alert(message);
+            }
+        });
+    }
     function refreshModifyInfo(cv)
     {
         cv.commitEdit();
@@ -138,10 +188,24 @@
         }
 
         btnCurrentPage.innerHTML = (cv.pageIndex + 1) + ' / ' + cv.pageCount;
+        lastPageIndex = cv.pageIndex;
 
         $("#recordsInfo").html(" 共 <b>" + cv.sourceCollection.length + "</b> 条记录，每页显示 <b>" + cv.pageSize + "</b> 条。");
     }
+    function updateGroupInfo(idx)
+    {
+        var cv = dataViewer.itemsSource;
+        lastGrpFields = idx;//grpDescs[menu.selectedIndex].field;
+        //session.groupField = idx;
 
+        mnGroup.header = "<span class='glyphicon glyphicon-search'></span> <b>分组显示：</b>" + grpDescs[idx].disp;
+
+        cv.groupDescriptions.clear();
+        if (grpDescs[idx].field == "no")
+            return;
+        cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription(grpDescs[idx].field));
+        dataViewer.collapseGroupsToLevel(foldLevel);
+    }
     function queryNow()
     {
         $("#modifyInfos").html("");
@@ -164,8 +228,9 @@
                     var cv = new wijmo.collections.CollectionView(data.records);
                     cv.trackChanges = true;
                     dataViewer.itemsSource = cv;
-                    cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription("employee"));
-                    dataViewer.collapseGroupsToLevel(foldLevel);
+                    //cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription(lastGrpFields));
+                    //dataViewer.collapseGroupsToLevel(foldLevel);
+                    updateGroupInfo(lastGrpFields);
 
                     dataViewer.columns.getColumn('employee').dataMap = new wijmo.grid.DataMap(data.employees, "id", "name");
 
@@ -174,8 +239,9 @@
                             $("#bottomTip").html(cv.currentItem.para.text);
                         refreshModifyInfo(cv)
                     });
-
-                    cv.pageSize = 15;
+                    cv.pageSize = wijmo.Globalize.parseInt($("#pagingInput").val());
+                    //cv.pageIndex = lastPageIndex;
+                    cv.moveToPage(lastPageIndex);
                     updateNaviagteButtons();
                 }
             },
@@ -190,6 +256,8 @@
         });
     }
     $(document).ready(function () {
+        $("#pagingInput").val(session.pageSize);
+
         //var theDate = new Date();
         dateBegin = new wijmo.input.InputDate('#dateBegin', {
             //min: new Date(2014, 8, 1),
@@ -217,19 +285,11 @@
         });
 
         $("#saveLayout").click(function () {
-            $.ajax({
-                type: 'post',
-                url: 'do.aspx',
-                data: "op=saveLayout&field=layoutA&columns=" + dataViewer.columnLayout,
-                cache: false,
-                dataType: 'json',
-                success: function (data) {
-                    $("#saveLayout").hide();
-                },
-                error: function (o, message) {
-                    alert(message);
-                }
-            });
+            saveSessionState();
+        });
+
+        $("#btnRefresh").click(function () {
+            queryNow();
         });
 
         $("#saveBizdata").click(function () {
@@ -248,11 +308,11 @@
                     return;
                 }
 
-                if (cv.itemsEdited[i].receivable == "")
+                if (cv.itemsEdited[i].receivable == null)
                     cv.itemsEdited[i].receivable = 88888888;
-                if (cv.itemsEdited[i].arrival == "")
+                if (cv.itemsEdited[i].arrival == null)
                     cv.itemsEdited[i].arrival = 88888888;
-                if (cv.itemsEdited[i].arrivalOld == "")
+                if (cv.itemsEdited[i].arrivalOld == null)
                     cv.itemsEdited[i].arrivalOld = 88888888;
             }
 
@@ -320,8 +380,8 @@
                 { header: '被告', binding: 'accused', isReadOnly: level > 2 },
                 { header: '原告', binding: 'accuser', isReadOnly: level > 2 },
                 { header: '法院', binding: 'court', width:250, isReadOnly: level > 2 },
-                { header: '应收金额', binding: 'receivable', dataType: "Number", format: 'c', visible: level <= 2 },
-                { header: '实收金额', binding: 'arrival', dataType: "Number", format: 'c', visible: level <= 1 },
+                { header: '应收金额', binding: 'receivable', dataType: "Number", required:false, format: 'c', visible: level <= 2 },
+                { header: '实收金额', binding: 'arrival', dataType: "Number", required:false, format: 'c', visible: level <= 1 },
                 { header: '来款途径', binding: 'arrivalFrom', visible: level <= 1 },
                 { header: '法庭', binding: 'courtRoom',  isReadOnly: level > 2 },
                 { header: '法官', binding: 'judge', visible: level <= 1 || level == 2 },
@@ -350,9 +410,11 @@
             },
             resizedColumn: function(e) {
                 $("#saveLayout").show();
+                //session.layout = dataViewer.columnLayout;
             },
             draggedColumn: function(e) {
                 $("#saveLayout").show();
+                //session.layout = dataViewer.columnLayout;
             }
             //new wijmo.odata.ODataCollectionView(
             //'http://services.odata.org/V4/Northwind/Northwind.svc/',
@@ -360,12 +422,15 @@
         });
 
         <%
-            string layout = dbutil.getFlexgridLayout("layoutA", (int)Session["userId"]);
-            if (layout != null)
-            {
-                Response.Write("dataViewer.columnLayout = '" + layout + "';");
-            }
+            //string layout = dbutil.getFlexgridLayout("layoutA", (int)Session["userId"]);
+            //if (layout != null)
+            //{
+            //    Response.Write("dataViewer.columnLayout = '" + layout + "';");
+            //}
         %>
+        if (session.layout != null) {
+            dataViewer.columnLayout = session.layout;
+        }
         //alert(JSON.stringify(dataViewer.columns));
         //{
         //    var cols = dataViewer.columns;
@@ -449,7 +514,7 @@
             var fullRs = dataViewer.itemsSource.sourceCollection;
 
             for (i = 0; i < fullRs.length; i++) {
-                if (fullRs[i].employee != eval(val))
+                if (fullRs[i][fld] != val)
                     continue;
                 totalReceivable += (fullRs[i].receivable == null ? 0 : eval(fullRs[i].receivable));
                 if (fullRs[i].arrival != null)
@@ -459,7 +524,8 @@
             }
             if (level >= 2)
                 return "<span>" + fldDisp + "：" + valDisp + " (" + n + " 项目)</span>";
-
+            if (valDisp == "")
+                valDisp = "未知" + fldDisp;
             return "<span>" + valDisp + " (" + n + " 条记录, 应收帐款共计： " + wijmo.Globalize.formatNumber(totalReceivable, 'c') 
                 + "，实收： " + wijmo.Globalize.formatNumber(totalArrival, 'c') 
                 + "，未到帐： " + totalUnarrival + " 笔)"
@@ -476,7 +542,9 @@
         $("#pagingInput").on('blur', function () {
             dataViewer.itemsSource.pageSize = wijmo.Globalize.parseInt(
                 this.value == "" ? "0" : this.value);
+            //session.pageSize = dataViewer.itemsSource.pageSize;
             updateNaviagteButtons();
+            $("#saveLayout").show();
         });
 
 
@@ -504,12 +572,22 @@
             dataViewer.itemsSource.moveToLastPage();
             updateNaviagteButtons();
         });
-        
-        //var mnEdit = new wijmo.input.Menu('#theEditMenu');
-        //mnEdit.itemClicked.addHandler(function(sender, args){
-        //    var menu = sender;
-        //    alert('Thanks for selecting option ' + menu.selectedIndex + ' from menu **' + menu.header + '**!');
-        //});
+
+        mnGroup = new wijmo.input.Menu('#groupMenu');
+        mnGroup.itemClicked.addHandler(function(sender, args){
+            var menu = sender;
+            //alert('Thanks for selecting option ' + menu.selectedIndex + ' from menu **' + menu.header + '**!');
+            //alert(JSON.stringify(menu));
+            //throw 'err';
+            //menu.header = "<span class='glyphicon glyphicon-search'></span> <b>分组显示：</b>" + grpDescs[menu.selectedIndex].disp;
+            updateGroupInfo(menu.selectedIndex);
+            $("#saveLayout").show();
+            //cv.groupDescriptions.clear();
+            //if (grpDescs[menu.selectedIndex].field == "no")
+            //    return;
+            //cv.groupDescriptions.push(new wijmo.collections.PropertyGroupDescription(grpDescs[menu.selectedIndex].field));
+            //dataViewer.collapseGroupsToLevel(foldLevel);
+        });
         //$("#saveBizdata").attr("disabled", level >= 2);
         //updateNaviagteButtons();
         if (level > 2)

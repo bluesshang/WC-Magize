@@ -1,6 +1,7 @@
 ﻿<%@ Page Language="C#" %>
 
 <%@ Import Namespace="System" %>
+<%@ Import Namespace="System.Data" %>
 <%@ Import Namespace="System.Web.UI" %>
 
 <%
@@ -42,8 +43,8 @@
 
     <!-- Wijmo -->
     <link href="css/wijmo.min.css" rel="stylesheet" />
-    <link href="css/wijmo.theme.material.min.css" rel="stylesheet" />
-    <!--link href="css/wijmo.theme.cocoa.min.css" rel="stylesheet" /-->
+    <!--link href="css/wijmo.theme.material.min.css" rel="stylesheet" /-->
+    <link href="css/<%=Session["cssfile"]%>" rel="stylesheet" />
 
     <script src="js/wijmo.min.js"></script>
     <script src="js/wijmo.input.min.js"></script>
@@ -88,14 +89,21 @@
                     <li><a href="#" id="search"><span class="glyphicon glyphicon-search"></span></a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon glyphicon-star"></span> Theme(material) <span class="caret"></span>
+                            <span class="glyphicon glyphicon glyphicon-star"></span> Theme(<%=Session["theme"]%>) <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">default</a></li>
-                            <li><a href="#">material</a></li>
-                            <li><a href="#">grayscale</a></li>
-                            <li><a href="#">cocoa</a></li>
-                            <li><a href="#">...</a></li>
+                            <%
+                                dbutil db = new dbutil();
+                                DataTable dt = db.query("select * from theme");
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    Response.Write("\r\n<li><a href=\"#\" onclick=loadTheme('" + row["id"] + "')>"
+                                        + row["name"]
+                                        + ((string)Session["theme"] == (string)row["name"] ? " <span class='glyphicon glyphicon-star'></span>" : "")
+                                        + "</a></li>");
+                                }
+                                db.close();
+                            %>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -334,8 +342,26 @@
             });
         }
 
-        $(document).ready(function () {
+        function loadTheme(themeId)
+        {
+            $.ajax({
+                type: 'post', url: 'do.aspx',
+                data: "op=loadTheme&themeId=" + themeId,
+                cache: false, dataType: 'json',
+                success: function (data) {
+                    if (data.status != 0) {
+                        alert("切换主题失败：" + data.message);
+                        return;
+                    }
+                    location.reload();
+                },
+                error: function (o, message) {
+                    alert(message);
+                }
+            });
+        }
 
+        $(document).ready(function () {
             $("#search").click(function () {
                 $("#mainClientArea").load("search.aspx");
             });
